@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Note from "./Note";
 
 export default class NoteList extends Component {
   state = {
@@ -36,7 +37,11 @@ export default class NoteList extends Component {
       <section className="content container">
         <div className="single-column">
           {Object.values(notes).map(note => (
-            <div className="note">{note.content}</div>
+            <Note
+              key={note.id}
+              id={note.id}
+              content={note.content}
+            />
           ))}
         </div>
       </section>
