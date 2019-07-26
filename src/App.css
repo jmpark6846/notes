@@ -1,33 +1,10 @@
-.navbar,
-.container {
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.navbar {
+.sidebar nav{
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 15px;
-  padding-bottom: 15px;
+  flex-direction: column;
+  height: 100%;
 }
 
-.navbar .title {
-  font-weight: 700;
-  font-size: 2rem;
-}
-.navbar ul {
-  display: flex;
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-}
-
-.navbar ul li {
-  display: inline-block;
-  margin-left: 20px;
-}
-
-.content.container{
-  padding-top: 20px;
+.note-list > div{
+  flex: 1 0;
+  height: 100%;
 }
