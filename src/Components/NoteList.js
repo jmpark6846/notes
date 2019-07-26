@@ -35,15 +35,6 @@ export default class NoteList extends Component {
     const { notes } = this.state;
     return (
       <section className="content container">
-        <div className="single-column">
-          {Object.values(notes).map(note => (
-            <Note
-              key={note.id}
-              id={note.id}
-              content={note.content}
-            />
-          ))}
-        </div>
       </section>
     );
   }
