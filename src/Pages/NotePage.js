@@ -3,9 +3,10 @@ import { debounce } from "lodash";
 import { Pane, minorScale, Heading, Menu, Text } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
-import Plain from 'slate-plain-serializer'
+import Plain from "slate-plain-serializer";
 import uuid from "uuid/v4";
 import { db } from "../App";
+import firebase from "firebase";
 
 export default class NotePage extends Component {
   state = {
@@ -39,20 +40,21 @@ export default class NotePage extends Component {
       .orderBy("createdAt")
       .limit(20)
       .get();
-    let notes = res.docs.map((doc) => {
-      let note = doc.data()
-      return {
+
+    let notes = {};
+    res.forEach(doc => {
+      let note = doc.data();
+      notes[note.id] = {
         ...note,
         title: Value.fromJSON(JSON.parse(note.title)),
         content: Value.fromJSON(JSON.parse(note.content))
-      }
-    })
-    let latestNote = res.docs[0].data();
-
+      };
+    });
+    let latestNote = Object.values(notes)[0];
     this.setState({
       selected: latestNote.id,
-      title: Value.fromJSON(JSON.parse(latestNote.title) || initialValue),
-      content: Value.fromJSON(JSON.parse(latestNote.content) || initialValue),
+      title: latestNote.title || initialValue,
+      content: latestNote.content || initialValue,
       isLoading: false,
       notes
     });
@@ -60,7 +62,9 @@ export default class NotePage extends Component {
 
   _handleNoteSelect = noteId => {
     this.setState({
-      selected: noteId
+      selected: noteId,
+      title: this.state.notes[noteId].title,
+      content: this.state.notes[noteId].content
     });
   };
 
@@ -73,13 +77,57 @@ export default class NotePage extends Component {
         content: JSON.stringify(this.state.content.toJSON())
       })
       .catch(error => console.log("error updating doc: " + error));
-  }, 1000);
+  }, 500);
 
-  _handleEditorChange = ({ value, type }) => {
-    this.setState({ [type]: value });
+  _handleTitleChange = ({ value }) => {
+    const newNotes = {
+      ...this.state.notes,
+      [this.state.selected]: {
+        ...this.state.notes[this.state.selected],
+        title: value
+      }
+    };
+    this.setState({ notes: newNotes, title: value });
     this._autoSave();
   };
 
+  _handleContentChange = ({ value }) => {
+    const newNotes = {
+      ...this.state.notes,
+      [this.state.selected]: {
+        ...this.state.notes[this.state.selected],
+        content: value
+      }
+    };
+    this.setState({ notes: newNotes, content: value });
+    this._autoSave();
+  };
+
+  _handleAddNoteButton = async () => {
+    let id = uuid();
+    const newNote = {
+      id,
+      title: Plain.deserialize(""),
+      content: Plain.deserialize(""),
+      createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+      user: ""
+    };
+    await db
+      .collection("notes")
+      .doc(id)
+      .set({
+        ...newNote,
+        title: JSON.stringify(newNote.title.toJSON()),
+        content: JSON.stringify(newNote.content.toJSON())
+      });
+
+    this.setState({
+      notes: { ...this.state.notes, [id]: newNote },
+      selected: id,
+      title: newNote.title,
+      content: newNote.content
+    });
+  };
   render() {
     const { notes, title, content, isLoading, selected } = this.state;
     return (
@@ -111,7 +159,9 @@ export default class NotePage extends Component {
             </Pane>
             <Pane>
               <Menu.Group>
-                <Menu.Item icon="edit">새 노트 작성하기</Menu.Item>
+                <Menu.Item onSelect={this._handleAddNoteButton} icon="edit">
+                  새 노트 작성하기
+                </Menu.Item>
               </Menu.Group>
             </Pane>
           </Menu>
@@ -130,7 +180,7 @@ export default class NotePage extends Component {
                     <Editor
                       value={title}
                       onChange={({ value }) => {
-                        this._handleEditorChange({ type: "title", value });
+                        this._handleTitleChange({ value });
                       }}
                     />
                   )}
@@ -143,10 +193,7 @@ export default class NotePage extends Component {
                   <Editor
                     value={content}
                     onChange={({ value }) =>
-                      this._handleEditorChange({
-                        type: "content",
-                        value
-                      })
+                      this._handleContentChange({ value })
                     }
                   />
                 )}
