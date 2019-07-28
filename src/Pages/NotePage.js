@@ -3,6 +3,7 @@ import { debounce } from "lodash";
 import { Pane, minorScale, Heading, Menu, Text } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
+import Plain from 'slate-plain-serializer'
 import uuid from "uuid/v4";
 import { db } from "../App";
 
@@ -36,15 +37,24 @@ export default class NotePage extends Component {
     let res = await db
       .collection("notes")
       .orderBy("createdAt")
-      .limit(1)
+      .limit(20)
       .get();
+    let notes = res.docs.map((doc) => {
+      let note = doc.data()
+      return {
+        ...note,
+        title: Value.fromJSON(JSON.parse(note.title)),
+        content: Value.fromJSON(JSON.parse(note.content))
+      }
+    })
     let latestNote = res.docs[0].data();
 
     this.setState({
       selected: latestNote.id,
       title: Value.fromJSON(JSON.parse(latestNote.title) || initialValue),
       content: Value.fromJSON(JSON.parse(latestNote.content) || initialValue),
-      isLoading: false
+      isLoading: false,
+      notes
     });
   }
 
@@ -94,7 +104,7 @@ export default class NotePage extends Component {
                     key={note.id}
                     onSelect={() => this._handleNoteSelect(note.id)}
                   >
-                    {note.title}
+                    {Plain.serialize(note.title)}
                   </Menu.Item>
                 ))}
               </Menu.Group>
