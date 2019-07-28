@@ -152,7 +152,7 @@ export default class NotePage extends Component {
                     key={note.id}
                     onSelect={() => this._handleNoteSelect(note.id)}
                   >
-                    {Plain.serialize(note.title)}
+                    {Plain.serialize(note.title) || "제목 없음"}
                   </Menu.Item>
                 ))}
               </Menu.Group>
@@ -177,7 +177,8 @@ export default class NotePage extends Component {
                   {isLoading ? (
                     <Text>title..</Text>
                   ) : (
-                    <Editor
+                      <Editor
+                        placeholder="Title here.."
                       value={title}
                       onChange={({ value }) => {
                         this._handleTitleChange({ value });
@@ -190,7 +191,9 @@ export default class NotePage extends Component {
                 {isLoading ? (
                   <Text>content..</Text>
                 ) : (
-                  <Editor
+                    <Editor
+                    placeholder="Content here.."
+
                     value={content}
                     onChange={({ value }) =>
                       this._handleContentChange({ value })
