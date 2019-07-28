@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { debounce } from "lodash";
 import { Pane, minorScale, Heading, Menu, Text } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
@@ -38,12 +39,11 @@ export default class NotePage extends Component {
       .limit(1)
       .get();
     let latestNote = res.docs[0].data();
+
     this.setState({
       selected: latestNote.id,
       title: Value.fromJSON(JSON.parse(latestNote.title) || initialValue),
-      content: Value.fromJSON(
-        JSON.parse(latestNote.content) || initialValue
-      ),
+      content: Value.fromJSON(JSON.parse(latestNote.content) || initialValue),
       isLoading: false
     });
   }
@@ -54,30 +54,24 @@ export default class NotePage extends Component {
     });
   };
 
-  _handleEditorChange = async ({ value, type }) => {
-    if (value.document != this.state[type].document) {
-      let res = await db
-        .collection("notes")
-        .doc(this.state.selected)
-        .update({
-          [type]: JSON.stringify(value.toJSON())
-        })
-        .catch(error => console.log("error updating doc: " + error));
-      
-      console.log(res)
-    }
-    this.setState({ [type]: value });
+  _autoSave = debounce(async () => {
+    await db
+      .collection("notes")
+      .doc(this.state.selected)
+      .update({
+        title: JSON.stringify(this.state.title.toJSON()),
+        content: JSON.stringify(this.state.content.toJSON())
+      })
+      .catch(error => console.log("error updating doc: " + error));
+  }, 1000);
 
+  _handleEditorChange = ({ value, type }) => {
+    this.setState({ [type]: value });
+    this._autoSave();
   };
 
   render() {
-    const {
-      notes,
-      title,
-      content,
-      isLoading,
-      selected
-    } = this.state;
+    const { notes, title, content, isLoading, selected } = this.state;
     return (
       <Pane display="flex" height="100%">
         <Pane width={240} height="100%" background="tint1" className="sidebar">
@@ -125,9 +119,9 @@ export default class NotePage extends Component {
                   ) : (
                     <Editor
                       value={title}
-                      onChange={({ value }) =>
-                        this._handleEditorChange({ value, type: "title" })
-                      }
+                      onChange={({ value }) => {
+                        this._handleEditorChange({ type: "title", value });
+                      }}
                     />
                   )}
                 </Heading>
@@ -140,8 +134,8 @@ export default class NotePage extends Component {
                     value={content}
                     onChange={({ value }) =>
                       this._handleEditorChange({
-                        value,
-                        type: "content"
+                        type: "content",
+                        value
                       })
                     }
                   />

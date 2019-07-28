@@ -6446,7 +6446,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
 
-lodash@^4.1.1, lodash@^4.17.4:
+lodash@^4.1.1, lodash@^4.17.15, lodash@^4.17.4:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
@@ -9299,6 +9299,13 @@ slash@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/slash/-/slash-2.0.0.tgz#de552851a1759df3a8f206535442f5ec4ddeab44"
   integrity sha512-ZYKh3Wh2z1PpEXWr0MpSBZ0V6mZHAQfYevttO11c51CaWjGTaadiKZ+wVt1PbMlDV5qhMFslpZCemhwOK7C89A==
+
+slate-auto-save@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/slate-auto-save/-/slate-auto-save-0.2.0.tgz#a06156f9df3c69d714bf053ddb48fe00e859295f"
+  integrity sha512-VJS8UC8rfHR2tbsendPPJr84YLG0EbfVeeCSuGuqnkTZh2736YteUuFX/18Cjo0xxrLWp0CVXAv1Qz8wmH1oLg==
+  dependencies:
+    lodash.debounce "^4.0.8"
 
 slate-base64-serializer@^0.2.107:
   version "0.2.107"
