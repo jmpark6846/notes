@@ -2,14 +2,15 @@ import React, { Component } from "react";
 import { Pane, minorScale, Heading, Menu, Text } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
-import uuid from 'uuid/v4'
+import uuid from "uuid/v4";
 import { db } from "../App";
 
 export default class NotePage extends Component {
   state = {
     selected: "",
     notes: {},
-    noteTitle: {},
+    title: {},
+    content: {},
     isLoading: true
   };
 
@@ -37,10 +38,12 @@ export default class NotePage extends Component {
       .limit(1)
       .get();
     let latestNote = res.docs[0].data();
-    console.log(Value.fromJSON(JSON.parse(latestNote.title)))
     this.setState({
       selected: latestNote.id,
-      noteTitle: Value.fromJSON(JSON.parse(latestNote.title) || initialValue),
+      title: Value.fromJSON(JSON.parse(latestNote.title) || initialValue),
+      content: Value.fromJSON(
+        JSON.parse(latestNote.content) || initialValue
+      ),
       isLoading: false
     });
   }
@@ -51,19 +54,30 @@ export default class NotePage extends Component {
     });
   };
 
-  _handleEditorChange = async ({ value }) => {
-    if (value.document != this.state.noteTitle.document) {
-      let res = await db.collection("notes").doc(this.state.selected).update({
-        title: JSON.stringify(value.toJSON())
-      })
-
+  _handleEditorChange = async ({ value, type }) => {
+    if (value.document != this.state[type].document) {
+      let res = await db
+        .collection("notes")
+        .doc(this.state.selected)
+        .update({
+          [type]: JSON.stringify(value.toJSON())
+        })
+        .catch(error => console.log("error updating doc: " + error));
+      
       console.log(res)
     }
-    this.setState({ noteTitle: value });
+    this.setState({ [type]: value });
+
   };
 
   render() {
-    const { notes, noteTitle, isLoading, selected } = this.state;
+    const {
+      notes,
+      title,
+      content,
+      isLoading,
+      selected
+    } = this.state;
     return (
       <Pane display="flex" height="100%">
         <Pane width={240} height="100%" background="tint1" className="sidebar">
@@ -110,24 +124,28 @@ export default class NotePage extends Component {
                     <Text>title..</Text>
                   ) : (
                     <Editor
-                      value={noteTitle}
+                      value={title}
                       onChange={({ value }) =>
-                        this._handleEditorChange({ value })
+                        this._handleEditorChange({ value, type: "title" })
                       }
                     />
                   )}
                 </Heading>
               </Pane>
               <Pane>
-                {/* <Editor
-                  value={content}
-                  onChange={({ value }) =>
-                    this._handleEditorChange({
-                      value,
-                      type: "content"
-                    })
-                  }
-                /> */}
+                {isLoading ? (
+                  <Text>content..</Text>
+                ) : (
+                  <Editor
+                    value={content}
+                    onChange={({ value }) =>
+                      this._handleEditorChange({
+                        value,
+                        type: "content"
+                      })
+                    }
+                  />
+                )}
               </Pane>
             </Pane>
           </Pane>
