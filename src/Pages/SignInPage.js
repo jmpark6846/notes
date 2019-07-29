@@ -1,8 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import { Pane, TextInput, Heading, Button, Text } from "evergreen-ui";
 import firebase from "../db";
 
-export default class SignInPage extends Component {
+class SignInPage extends Component {
   state = {
     email: "",
     password: "",
@@ -10,13 +11,15 @@ export default class SignInPage extends Component {
   };
   _handleSignin = async () => {
     try {
-      await firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
-      this.props.history.push('/')
+      await firebase
+        .auth()
+        .signInWithEmailAndPassword(this.state.email, this.state.password);
+      this.props.history.push("/");
     } catch (error) {
-      console.log(error)
+      console.log(error);
       this.setState({ errorMessage: error.message });
     }
-  }
+  };
   _handleChange = ({ target: { name, value } }) => {
     this.setState({ [name]: value });
   };
@@ -58,6 +61,10 @@ export default class SignInPage extends Component {
           </Pane>
           <Pane display="flex" justifyContent="flex-end" marginTop={20}>
             <Button
+              marginRight={10}
+              onClick={() => this.props.history.push("/signup")}
+            >회원가입</Button>
+            <Button
               appearance="primary"
               intent="none"
               onClick={() => this._handleSignin()}
@@ -70,3 +77,5 @@ export default class SignInPage extends Component {
     );
   }
 }
+
+export default withRouter(SignInPage);

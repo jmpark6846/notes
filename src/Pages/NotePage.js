@@ -7,6 +7,7 @@ import {
   Menu,
   Text,
   Avatar,
+  Popover
 } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
@@ -15,7 +16,22 @@ import uuid from "uuid/v4";
 import firebase, { db } from "../db";
 import { withRouter } from "react-router-dom";
 
-
+const initialValue = {
+  document: {
+    nodes: [
+      {
+        object: "block",
+        type: "paragraph",
+        nodes: [
+          {
+            object: "text",
+            text: "A line of text in a paragraph."
+          }
+        ]
+      }
+    ]
+  }
+};
 
 class NotePage extends Component {
   state = {
@@ -24,59 +40,75 @@ class NotePage extends Component {
     title: {},
     content: {},
     isLoading: true,
-    username: "",
+    username: ""
   };
 
   async componentDidMount() {
-    const initialValue = {
-      document: {
-        nodes: [
-          {
-            object: "block",
-            type: "paragraph",
-            nodes: [
-              {
-                object: "text",
-                text: "A line of text in a paragraph."
-              }
-            ]
-          }
-        ]
-      }
-    };
-
-    let res = await db
-      .collection("notes")
-      .orderBy("createdAt")
-      .limit(20)
-      .get();
-
-    let notes = {};
-    res.forEach(doc => {
-      let note = doc.data();
-      notes[note.id] = {
-        ...note,
-        title: Value.fromJSON(JSON.parse(note.title)),
-        content: Value.fromJSON(JSON.parse(note.content))
-      };
-    });
-
-    let latestNote = Object.values(notes)[0];
-
     // TODO: 전역 레벨에서 관리?
     let user = firebase.auth().currentUser;
     if (!user) {
-      this.props.history.push('/signin')
+      this.props.history.push("/signin");
+    } else {
+      let res = await db
+        .collection("notes")
+        .where("user", "==", user.email)
+        .orderBy("createdAt")
+        .limit(20)
+        .get();
+
+      let notes = {};
+      if (res.size === 0) {
+        await this._handleAddNoteButton({ email: user.email });
+      } else {
+        res.forEach(doc => {
+          let note = doc.data();
+          notes[note.id] = {
+            ...note,
+            title: Value.fromJSON(JSON.parse(note.title)),
+            content: Value.fromJSON(JSON.parse(note.content))
+          };
+        });
+        let latestNote = Object.values(notes)[0];
+        this.setState({
+          selected: latestNote.id,
+          title: latestNote.title || initialValue,
+          content: latestNote.content || initialValue,
+          notes
+        });
+      }
+
+      this.setState({
+        isLoading: false,
+        username: user.displayName,
+        email: user.email
+      });
     }
-    this.setState({
-      selected: latestNote.id,
-      title: latestNote.title || initialValue,
-      content: latestNote.content || initialValue,
-      isLoading: false,
-      username: user.displayName,
-      notes
-    });
   }
+  _handleAddNoteButton = async ({ email }) => {
+    let id = uuid();
+    const newNote = {
+      id,
+      title: Plain.deserialize(""),
+      content: Plain.deserialize(""),
+      createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
+      user: email || this.state.email
+    };
+    await db
+      .collection("notes")
+      .doc(id)
+      .set({
+        ...newNote,
+        title: JSON.stringify(newNote.title.toJSON()),
+        content: JSON.stringify(newNote.content.toJSON())
+      });
+
+    this.setState({
+      notes: { ...this.state.notes, [id]: newNote },
+      selected: id,
+      title: newNote.title,
+      content: newNote.content
+    });
+  };
 
   _handleNoteSelect = noteId => {
     this.setState({
@@ -121,32 +153,22 @@ class NotePage extends Component {
     this._autoSave();
   };
 
-  _handleAddNoteButton = async () => {
-    let id = uuid();
-    const newNote = {
-      id,
-      title: Plain.deserialize(""),
-      content: Plain.deserialize(""),
-      createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      user: ""
-    };
-    await db
-      .collection("notes")
-      .doc(id)
-      .set({
-        ...newNote,
-        title: JSON.stringify(newNote.title.toJSON()),
-        content: JSON.stringify(newNote.content.toJSON())
-      });
-
-    this.setState({
-      notes: { ...this.state.notes, [id]: newNote },
-      selected: id,
-      title: newNote.title,
-      content: newNote.content
-    });
+  _handleLogOut = async () => {
+    try {
+      await firebase.auth().signOut();
+      this.props.history.push("/signin");
+    } catch (err) {
+      console.log(err);
+    }
   };
 
+  _handleEditorKeyDown = (event, editor, next) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+    } else {
+      return next();
+    }
+  };
   render() {
     const { notes, title, content, isLoading, username } = this.state;
     return (
@@ -156,15 +178,29 @@ class NotePage extends Component {
             {/* display: flex */}
             <Pane>
               <Menu.Group>
-                <Menu.Item
-                  onSelect={() => this.setState({ isSearchOpen: true })}
+                <Popover
+                  content={
+                    <Menu>
+                      <Menu.Group>
+                        <Menu.Item icon="log-out" onSelect={this._handleLogOut}>
+                          로그아웃
+                        </Menu.Item>
+                      </Menu.Group>
+                    </Menu>
+                  }
                 >
-                  <Pane display="flex" alignItems="center">
-                    <Avatar name={username} size={25} marginRight={5}/>
-                    <Text>{username}</Text>
-                  </Pane>
-                  
-                </Menu.Item>
+                  <Menu.Item>
+                    <Pane display="flex" alignItems="center">
+                      <Avatar
+                        name={username}
+                        size={25}
+                        sizeLimitOneCharacter={25}
+                        marginRight={5}
+                      />
+                      <Text fontWeight={600}>{username}</Text>
+                    </Pane>
+                  </Menu.Item>
+                </Popover>
               </Menu.Group>
             </Pane>
             <Pane
@@ -193,37 +229,46 @@ class NotePage extends Component {
             </Pane>
           </Menu>
         </Pane>
-        <Pane flex={1} display="flex" flexDirection="column">
-          <Pane padding={minorScale(4)} flex={1}>
-            <Pane width={730} marginX="auto" marginTop={60}>
-              <Pane marginBottom={45}>
-                <Heading size={900}>
-                  {isLoading ? (
-                    <Text>title..</Text>
-                  ) : (
-                    <Editor
-                      placeholder="Title here.."
-                      value={title}
-                      onChange={({ value }) => {
-                        this._handleTitleChange({ value });
-                      }}
-                    />
-                  )}
-                </Heading>
-              </Pane>
-              <Pane>
+        <Pane height="100%" flex={1}>
+          <Pane
+            display="flex"
+            flexDirection="column"
+            height="100%"
+            width={730}
+            margin="auto"
+            paddingTop={50}
+          >
+            <Pane marginBottom={20}>
+              <Heading size={900}>
                 {isLoading ? (
-                  <Text>content..</Text>
+                  <Text>title..</Text>
                 ) : (
                   <Editor
-                    placeholder="Content here.."
-                    value={content}
-                    onChange={({ value }) =>
-                      this._handleContentChange({ value })
-                    }
+                    placeholder="Title here.."
+                    value={title}
+                    onKeyDown={this._handleEditorKeyDown}
+                    onChange={({ value }) => {
+                      this._handleTitleChange({ value });
+                    }}
                   />
                 )}
-              </Pane>
+              </Heading>
+            </Pane>
+            <Pane
+            flex={1}
+            // overflowX="hidden"
+            overflowY="auto"
+            >
+              {isLoading ? (
+                <Text>content..</Text>
+              ) : (
+                <Editor
+                  // height="100%"
+                  placeholder="Content here.."
+                  value={content}
+                  onChange={({ value }) => this._handleContentChange({ value })}
+                />
+              )}
             </Pane>
           </Pane>
         </Pane>
@@ -232,5 +277,4 @@ class NotePage extends Component {
   }
 }
 
-
-export default withRouter(NotePage)
+export default withRouter(NotePage);

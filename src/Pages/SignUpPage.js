@@ -26,9 +26,7 @@ class SignUpPage extends Component {
   _handleChange = ({ target: { name, value } }) => {
     this.setState({ [name]: value });
   };
-  _handleCancel = () => {
-    this.props.history.push('/')
-  }
+
   render() {
     return (
       <Pane background="tint1" height="100%" paddingTop={50}>
@@ -77,7 +75,7 @@ class SignUpPage extends Component {
             <Text color="red">{this.state.errorMessage}</Text>
           </Pane>
           <Pane display="flex" justifyContent="flex-end" marginTop={20}>
-            <Button marginRight={10} onClick={this._handleCancel}>돌아가기</Button>
+            <Button marginRight={10} onClick={()=>this.props.history.push('/signin')}>돌아가기</Button>
             <Button
               appearance="primary"
               intent="none"
