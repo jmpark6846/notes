@@ -6,21 +6,25 @@ import {
   Heading,
   Menu,
   Text,
+  Avatar,
 } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import uuid from "uuid/v4";
 import firebase, { db } from "../db";
+import { withRouter } from "react-router-dom";
 
 
-export default class NotePage extends Component {
+
+class NotePage extends Component {
   state = {
     selected: "",
     notes: {},
     title: {},
     content: {},
     isLoading: true,
+    username: "",
   };
 
   async componentDidMount() {
@@ -58,11 +62,18 @@ export default class NotePage extends Component {
     });
 
     let latestNote = Object.values(notes)[0];
+
+    // TODO: 전역 레벨에서 관리?
+    let user = firebase.auth().currentUser;
+    if (!user) {
+      this.props.history.push('/signin')
+    }
     this.setState({
       selected: latestNote.id,
       title: latestNote.title || initialValue,
       content: latestNote.content || initialValue,
       isLoading: false,
+      username: user.displayName,
       notes
     });
   }
@@ -137,7 +148,7 @@ export default class NotePage extends Component {
   };
 
   render() {
-    const { notes, title, content, isLoading, selected } = this.state;
+    const { notes, title, content, isLoading, username } = this.state;
     return (
       <Pane display="flex" height="100%">
         <Pane width={240} height="100%" background="tint1" className="sidebar">
@@ -147,9 +158,12 @@ export default class NotePage extends Component {
               <Menu.Group>
                 <Menu.Item
                   onSelect={() => this.setState({ isSearchOpen: true })}
-                  icon="search"
                 >
-                  검색하기
+                  <Pane display="flex" alignItems="center">
+                    <Avatar name={username} size={25} marginRight={5}/>
+                    <Text>{username}</Text>
+                  </Pane>
+                  
                 </Menu.Item>
               </Menu.Group>
             </Pane>
@@ -217,3 +231,6 @@ export default class NotePage extends Component {
     );
   }
 }
+
+
+export default withRouter(NotePage)

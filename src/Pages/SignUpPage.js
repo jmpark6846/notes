@@ -8,11 +8,15 @@ class SignUpPage extends Component {
   state = {
     email: "",
     password: "",
-    errorMessage: ""
+    username:"",
+    errorMessage: "",
   };
   _handleSignup = async () => {
     try {
-      await firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)  
+      let { user } = await firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)  
+      await user.updateProfile({
+        displayName:this.state.username
+      })
       this.props.history.push('/')
     } catch (error) {
       console.log(error)
@@ -55,9 +59,20 @@ class SignUpPage extends Component {
             placeholder="비밀번호"
             width="100%"
             type="password"
+            marginBottom={10}
             value={this.state.password}
             required
           />
+          <TextInput
+            name="username"
+            onChange={this._handleChange}
+            placeholder="이름"
+            marginBottom={10}
+            width="100%"
+            value={this.state.username}
+            required
+          />
+          
           <Pane intent="danger" padding={10}>
             <Text color="red">{this.state.errorMessage}</Text>
           </Pane>
