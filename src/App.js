@@ -1,24 +1,18 @@
 import React from "react";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import NotePage from "./Pages/NotePage";
+import SignInPage from './Pages/SignInPage'
+import SignUpPage from './Pages/SignUpPage'
+
 import "./App.css";
 
-import firebase from "firebase/app";
-import "firebase/firestore";
-
-firebase.initializeApp({
-  apiKey: "AIzaSyD70mOFNDK4VjoQOw9JBItSw0_aME3EeWw",
-  authDomain: "notes-d5c0d.firebaseapp.com",
-  databaseURL: "https://notes-d5c0d.firebaseio.com",
-  projectId: "notes-d5c0d",
-  storageBucket: "notes-d5c0d.appspot.com",
-  messagingSenderId: "1001740796289",
-  appId: "1:1001740796289:web:4c92c4b3621037cc"
-});
-
-export const db = firebase.firestore();
 
 function App() {
-  return <NotePage />;
+  return <Router>
+    <Route exact path="/" component={NotePage}/>
+    <Route path="/signup" component={SignUpPage} />
+    <Route path="/signin" component={SignInPage} />
+  </Router> 
 }
 
 export default App;

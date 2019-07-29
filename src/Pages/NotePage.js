@@ -1,12 +1,18 @@
 import React, { Component } from "react";
 import { debounce } from "lodash";
-import { Pane, minorScale, Heading, Menu, Text } from "evergreen-ui";
+import {
+  Pane,
+  minorScale,
+  Heading,
+  Menu,
+  Text,
+} from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 import uuid from "uuid/v4";
-import { db } from "../App";
-import firebase from "firebase";
+import firebase, { db } from "../db";
+
 
 export default class NotePage extends Component {
   state = {
@@ -14,7 +20,7 @@ export default class NotePage extends Component {
     notes: {},
     title: {},
     content: {},
-    isLoading: true
+    isLoading: true,
   };
 
   async componentDidMount() {
@@ -50,6 +56,7 @@ export default class NotePage extends Component {
         content: Value.fromJSON(JSON.parse(note.content))
       };
     });
+
     let latestNote = Object.values(notes)[0];
     this.setState({
       selected: latestNote.id,
@@ -128,6 +135,7 @@ export default class NotePage extends Component {
       content: newNote.content
     });
   };
+
   render() {
     const { notes, title, content, isLoading, selected } = this.state;
     return (
@@ -137,7 +145,12 @@ export default class NotePage extends Component {
             {/* display: flex */}
             <Pane>
               <Menu.Group>
-                <Menu.Item icon="search">검색하기</Menu.Item>
+                <Menu.Item
+                  onSelect={() => this.setState({ isSearchOpen: true })}
+                  icon="search"
+                >
+                  검색하기
+                </Menu.Item>
               </Menu.Group>
             </Pane>
             <Pane
@@ -167,9 +180,6 @@ export default class NotePage extends Component {
           </Menu>
         </Pane>
         <Pane flex={1} display="flex" flexDirection="column">
-          <Pane padding={minorScale(4)} background="yellowTint">
-            breadcumb(needs to be implemented)
-          </Pane>
           <Pane padding={minorScale(4)} flex={1}>
             <Pane width={730} marginX="auto" marginTop={60}>
               <Pane marginBottom={45}>
@@ -177,8 +187,8 @@ export default class NotePage extends Component {
                   {isLoading ? (
                     <Text>title..</Text>
                   ) : (
-                      <Editor
-                        placeholder="Title here.."
+                    <Editor
+                      placeholder="Title here.."
                       value={title}
                       onChange={({ value }) => {
                         this._handleTitleChange({ value });
@@ -191,9 +201,8 @@ export default class NotePage extends Component {
                 {isLoading ? (
                   <Text>content..</Text>
                 ) : (
-                    <Editor
+                  <Editor
                     placeholder="Content here.."
-
                     value={content}
                     onChange={({ value }) =>
                       this._handleContentChange({ value })
