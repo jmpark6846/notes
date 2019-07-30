@@ -9,7 +9,9 @@ import {
   Avatar,
   Popover,
   Button,
-  IconButton
+  IconButton,
+  SideSheet,
+  Position
 } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
@@ -44,7 +46,7 @@ class NotePage extends Component {
     content: {},
     isLoading: true,
     username: "",
-    isDeleteOpen: false
+    isShown: false
   };
 
   async componentDidMount() {
@@ -87,9 +89,9 @@ class NotePage extends Component {
         username: user.displayName,
         email: user.email
       });
-    } 
+    }
   }
-  _handleAddNoteButton = async ({ email }={ email: null}) => {
+  _handleAddNoteButton = async ({ email } = { email: null }) => {
     let id = uuid();
     const newNote = {
       id,
@@ -101,23 +103,23 @@ class NotePage extends Component {
 
     try {
       await db
-      .collection("notes")
-      .doc(id)
-      .set({
-        ...newNote,
-        title: JSON.stringify(newNote.title.toJSON()),
-        content: JSON.stringify(newNote.content.toJSON())
-      });  
+        .collection("notes")
+        .doc(id)
+        .set({
+          ...newNote,
+          title: JSON.stringify(newNote.title.toJSON()),
+          content: JSON.stringify(newNote.content.toJSON())
+        });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-    
 
     this.setState({
       notes: { ...this.state.notes, [id]: newNote },
       selected: id,
       title: newNote.title,
-      content: newNote.content
+      content: newNote.content, 
+      isShown: false,
     });
   };
 
@@ -183,9 +185,12 @@ class NotePage extends Component {
 
   _handleNoteDelete = async ({ noteId }) => {
     try {
-      await db.collection("notes").doc(noteId).delete()
+      await db
+        .collection("notes")
+        .doc(noteId)
+        .delete();
       if (Object.keys(this.state.notes).length === 1) {
-        this.setState({ notes: {} })
+        this.setState({ notes: {} });
         await this._handleAddNoteButton();
       } else {
         let updatedNotes = { ...this.state.notes };
@@ -219,62 +224,76 @@ class NotePage extends Component {
     const { notes, title, content, isLoading, username } = this.state;
     return (
       <Pane display="flex" height="100%">
-        <Pane width={240} height="100%" background="tint1" className="sidebar">
-          {/* display: flex */}
-          <Menu>
-            <Pane>
-              <Menu.Group>
-                <Popover
-                  content={
-                    <Menu>
-                      <Menu.Group>
-                        <Menu.Item icon="log-out" onSelect={this._handleLogOut}>
-                          로그아웃
-                        </Menu.Item>
-                      </Menu.Group>
-                    </Menu>
-                  }
-                >
-                  <Menu.Item>
-                    <Pane display="flex" alignItems="center">
-                      <Avatar
-                        name={username}
-                        size={25}
-                        sizeLimitOneCharacter={25}
-                        marginRight={5}
-                      />
-                      <Text fontWeight={600}>{username}</Text>
-                    </Pane>
-                  </Menu.Item>
-                </Popover>
-              </Menu.Group>
-            </Pane>
-            <Pane
-              className="note-list"
-              flex={1}
-              overflowX="hidden"
-              overflowY="auto"
-            >
-              <Menu.Group>
-                {Object.values(notes).map(note => (
-                  <Menu.Item
-                    key={note.id}
-                    // onSelect={() => this._handleNoteSelect(note.id)}
+        <SideSheet
+          position={Position.LEFT}
+          isShown={this.state.isShown}
+          onCloseComplete={() => this.setState({ isShown: false })}
+        >
+          <Pane
+            height="100%"
+            background="tint1"
+            className="sidebar"
+          >
+            {/* display: flex */}
+            <Menu>
+              <Pane>
+                <Menu.Group>
+                  <Popover
+                    position={Position.BOTTOM_RIGHT}
+                    content={
+                      <Menu>
+                        <Menu.Group>
+                          <Menu.Item
+                            icon="log-out"
+                            onSelect={this._handleLogOut}
+                          >
+                            로그아웃
+                          </Menu.Item>
+                        </Menu.Group>
+                      </Menu>
+                    }
                   >
-                    {Plain.serialize(note.title) || "제목 없음"}
+                    <Menu.Item>
+                      <Pane display="flex" alignItems="center">
+                        <Avatar
+                          name={username}
+                          size={25}
+                          sizeLimitOneCharacter={25}
+                          marginRight={5}
+                        />
+                        <Text fontWeight={600}>{username}</Text>
+                      </Pane>
+                    </Menu.Item>
+                  </Popover>
+                </Menu.Group>
+              </Pane>
+              <Pane
+                className="note-list"
+                flex={1}
+                overflowX="hidden"
+                overflowY="auto"
+              >
+                <Menu.Group>
+                  {Object.values(notes).map(note => (
+                    <Menu.Item
+                      key={note.id}
+                      // onSelect={() => this._handleNoteSelect(note.id)}
+                    >
+                      {Plain.serialize(note.title) || "제목 없음"}
+                    </Menu.Item>
+                  ))}
+                </Menu.Group>
+              </Pane>
+              <Pane>
+                <Menu.Group>
+                  <Menu.Item onSelect={this._handleAddNoteButton} icon="edit">
+                    새 노트 작성하기
                   </Menu.Item>
-                ))}
-              </Menu.Group>
-            </Pane>
-            <Pane>
-              <Menu.Group>
-                <Menu.Item onSelect={this._handleAddNoteButton} icon="edit">
-                  새 노트 작성하기
-                </Menu.Item>
-              </Menu.Group>
-            </Pane>
-          </Menu>
-        </Pane>
+                </Menu.Group>
+              </Pane>
+            </Menu>
+          </Pane>
+        </SideSheet>
         <Pane height="100%" flex={1}>
           <Pane
             display="flex"
@@ -282,14 +301,21 @@ class NotePage extends Component {
             marginX={majorScale(2)}
             marginTop={majorScale(2)}
           >
-            <IconButton appearance="minimal" icon="menu" iconSize={18} />
+            <IconButton
+              appearance="minimal"
+              icon="menu"
+              iconSize={18}
+              onClick={() => this.setState({ isShown: true })}
+            />
             <Popover
               content={
                 <Menu>
                   <Menu.Group>
                     <Menu.Item
                       icon="delete"
-                      onSelect={() => this._handleNoteDelete({ noteId: this.state.selected })}
+                      onSelect={() =>
+                        this._handleNoteDelete({ noteId: this.state.selected })
+                      }
                     >
                       노트 삭제
                     </Menu.Item>
@@ -297,9 +323,9 @@ class NotePage extends Component {
                 </Menu>
               }
             >
-              <IconButton appearance="minimal" icon="more" iconSize={18}/>
+              <IconButton appearance="minimal" icon="more" iconSize={18} />
             </Popover>
-          </Pane> 
+          </Pane>
           <Pane
             display="flex"
             flexDirection="column"

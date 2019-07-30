@@ -12,6 +12,7 @@
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
+    "react-sizes": "^2.0.0",
     "slate": "^0.47.4",
     "slate-auto-save": "^0.2.0",
     "slate-react": "^0.22.4",
