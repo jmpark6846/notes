@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { debounce } from "lodash";
+import withSizes from "react-sizes";
+import { compose } from "recompose";
 import {
   Pane,
   minorScale,
@@ -38,6 +40,7 @@ const initialValue = {
   }
 };
 
+const mobileWidth = 730
 class NotePage extends Component {
   state = {
     selected: "",
@@ -118,8 +121,8 @@ class NotePage extends Component {
       notes: { ...this.state.notes, [id]: newNote },
       selected: id,
       title: newNote.title,
-      content: newNote.content, 
-      isShown: false,
+      content: newNote.content,
+      isShown: false
     });
   };
 
@@ -223,17 +226,13 @@ class NotePage extends Component {
   render() {
     const { notes, title, content, isLoading, username } = this.state;
     return (
-      <Pane display="flex" height="100%">
+      <Pane height="100%">
         <SideSheet
           position={Position.LEFT}
           isShown={this.state.isShown}
           onCloseComplete={() => this.setState({ isShown: false })}
         >
-          <Pane
-            height="100%"
-            background="tint1"
-            className="sidebar"
-          >
+          <Pane height="100%" background="tint1" className="sidebar">
             {/* display: flex */}
             <Menu>
               <Pane>
@@ -294,7 +293,7 @@ class NotePage extends Component {
             </Menu>
           </Pane>
         </SideSheet>
-        <Pane height="100%" flex={1}>
+        <Pane height="100%">
           <Pane
             display="flex"
             justifyContent="space-between"
@@ -330,7 +329,8 @@ class NotePage extends Component {
             display="flex"
             flexDirection="column"
             height="100%"
-            width={730}
+            paddingX={ this.props.isMobile ? 15 : 0}
+            width={ this.props.isMobile ? "100%" : mobileWidth}
             margin="auto"
             paddingTop={15}
           >
@@ -359,9 +359,9 @@ class NotePage extends Component {
                 <Text>content..</Text>
               ) : (
                 <Editor
-                  // height="100%"
                   placeholder="Content here.."
                   value={content}
+                  style={{ height: "100%" }}
                   onChange={({ value }) => this._handleContentChange({ value })}
                 />
               )}
@@ -373,4 +373,7 @@ class NotePage extends Component {
   }
 }
 
-export default withRouter(NotePage);
+export default compose(
+  withSizes(({ width }) => ({ isMobile: width < mobileWidth })),
+  withRouter
+)(NotePage);
