@@ -4,16 +4,15 @@ import withSizes from "react-sizes";
 import { compose } from "recompose";
 import {
   Pane,
-  minorScale,
   Heading,
   Menu,
   Text,
   Avatar,
   Popover,
-  Button,
   IconButton,
   SideSheet,
-  Position
+  Position,
+  Spinner
 } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
@@ -41,6 +40,7 @@ const initialValue = {
 };
 
 const mobileWidth = 730;
+
 class NotePage extends Component {
   state = {
     selected: "",
@@ -48,16 +48,27 @@ class NotePage extends Component {
     title: {},
     content: {},
     isLoading: true,
-    username: "",
-    isShown: false
+    isShown: false,
+    user: null
   };
-
+  componentWillUnmount() {
+    this._ismounted = false;
+  }
+  
   async componentDidMount() {
-    // TODO: 전역 레벨에서 관리?
-    let user = firebase.auth().currentUser;
-    if (!user) {
-      this.props.history.push("/signin");
-    } else {
+    const that = this
+    this._ismounted = true;
+    
+    firebase.auth().onAuthStateChanged(user => {
+      if (user && that._ismounted) { 
+        that.setState({ user })
+      }
+    });
+  }
+  async componentDidUpdate(prevProps, prevState) {
+  
+    if (prevState.user == null && this.state.user != null) {
+      let { user } = this.state
       let res = await db
         .collection("notes")
         .where("user", "==", user.email)
@@ -101,7 +112,7 @@ class NotePage extends Component {
       title: Plain.deserialize(""),
       content: Plain.deserialize(""),
       createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      user: email || this.state.email
+      user: email || this.state.user.email
     };
 
     try {
@@ -225,145 +236,165 @@ class NotePage extends Component {
     }
   };
   render() {
-    const { notes, title, content, isLoading, username } = this.state;
+    const { notes, title, content, isLoading, user } = this.state;
     return (
-      <Pane height="100%">
-        <SideSheet
-          position={Position.LEFT}
-          isShown={this.state.isShown}
-          width={this.props.isMobile ? this.props.width - 70 : 250}
-          onCloseComplete={() => this.setState({ isShown: false })}
-        >
-          <Pane height="100%" background="tint1" className="sidebar">
-            {/* display: flex */}
-            <Menu>
-              <Pane>
-                <Menu.Group>
-                  <Popover
-                    position={Position.BOTTOM_RIGHT}
-                    content={
-                      <Menu>
-                        <Menu.Group>
-                          <Menu.Item
-                            icon="log-out"
-                            onSelect={this._handleLogOut}
-                          >
-                            로그아웃
-                          </Menu.Item>
-                        </Menu.Group>
-                      </Menu>
-                    }
-                  >
-                    <Menu.Item>
-                      <Pane display="flex" alignItems="center">
-                        <Avatar
-                          name={username}
-                          size={25}
-                          sizeLimitOneCharacter={25}
-                          marginRight={5}
-                        />
-                        <Text fontWeight={600}>{username}</Text>
-                      </Pane>
-                    </Menu.Item>
-                  </Popover>
-                </Menu.Group>
-              </Pane>
-              <Pane
-                className="note-list"
-                flex={1}
-                overflowX="hidden"
-                overflowY="auto"
-              >
-                <Menu.Group>
-                  {Object.values(notes).map(note => (
-                    <Menu.Item
-                      key={note.id}
-                      onSelect={() => this._handleNoteSelect(note.id)}
-                    >
-                      {Plain.serialize(note.title) || "제목 없음"}
-                    </Menu.Item>
-                  ))}
-                </Menu.Group>
-              </Pane>
-              <Pane>
-                <Menu.Group>
-                  <Menu.Item onSelect={this._handleAddNoteButton} icon="edit">
-                    새 노트 작성하기
-                  </Menu.Item>
-                </Menu.Group>
-              </Pane>
-            </Menu>
-          </Pane>
-        </SideSheet>
-        <Pane display="flex" flexDirection="column" height="100%">
+      <React.Fragment>
+        { !user ? (
           <Pane
             display="flex"
-            justifyContent="space-between"
-            marginX={majorScale(2)}
-            marginTop={majorScale(2)}
+            alignItems="center"
+            justifyContent="center"
+            height={400}
           >
-            <IconButton
-              appearance="minimal"
-              icon="menu"
-              iconSize={18}
-              onClick={() => this.setState({ isShown: true })}
-            />
-            <Popover
-              content={
-                <Menu>
-                  <Menu.Group>
-                    <Menu.Item
-                      icon="delete"
-                      onSelect={() =>
-                        this._handleNoteDelete({ noteId: this.state.selected })
-                      }
-                    >
-                      노트 삭제
-                    </Menu.Item>
-                  </Menu.Group>
-                </Menu>
-              }
+            <Spinner />
+          </Pane>
+        ):(
+          <Pane height="100%">
+            <SideSheet
+              position={Position.LEFT}
+              isShown={this.state.isShown}
+              width={this.props.isMobile ? this.props.width - 70 : 250}
+              onCloseComplete={() => this.setState({ isShown: false })}
             >
-              <IconButton appearance="minimal" icon="more" iconSize={18} />
-            </Popover>
-          </Pane>
-          <Pane
-            paddingX={this.props.isMobile ? 15 : 0}
-            width={this.props.isMobile ? "100%" : mobileWidth}
-            marginX="auto"
-            paddingTop={15}
-          >
-            <Pane marginBottom={20}>
-              <Heading size={900}>
-                {isLoading ? (
-                  <Text>title..</Text>
-                ) : (
-                  <Editor
-                    placeholder="Title here.."
-                    value={title}
-                    onKeyDown={this._handleEditorKeyDown}
-                    onChange={({ value }) => {
-                      this._handleTitleChange({ value });
-                    }}
-                  />
-                )}
-              </Heading>
-            </Pane>
-            <Pane flex={1} overflowY="auto">
-              {isLoading ? (
-                <Text>content..</Text>
-              ) : (
-                <Editor
-                  placeholder="Content here.."
-                  value={content}
-                  style={{ height: "100%" }}
-                  onChange={({ value }) => this._handleContentChange({ value })}
+              <Pane height="100%" background="tint1" className="sidebar">
+                {/* display: flex */}
+                <Menu>
+                  <Pane>
+                    <Menu.Group>
+                      <Popover
+                        position={Position.BOTTOM_RIGHT}
+                        content={
+                          <Menu>
+                            <Menu.Group>
+                              <Menu.Item
+                                icon="log-out"
+                                onSelect={this._handleLogOut}
+                              >
+                                로그아웃
+                              </Menu.Item>
+                            </Menu.Group>
+                          </Menu>
+                        }
+                      >
+                        <Menu.Item>
+                          <Pane display="flex" alignItems="center">
+                            <Avatar
+                              name={user.displayName}
+                              size={25}
+                              sizeLimitOneCharacter={25}
+                              marginRight={5}
+                            />
+                            <Text fontWeight={600}>{user.displayName}</Text>
+                          </Pane>
+                        </Menu.Item>
+                      </Popover>
+                    </Menu.Group>
+                  </Pane>
+                  <Pane
+                    className="note-list"
+                    flex={1}
+                    overflowX="hidden"
+                    overflowY="auto"
+                  >
+                    <Menu.Group>
+                      {Object.values(notes).map(note => (
+                        <Menu.Item
+                          key={note.id}
+                          onSelect={() => this._handleNoteSelect(note.id)}
+                        >
+                          {Plain.serialize(note.title) || "제목 없음"}
+                        </Menu.Item>
+                      ))}
+                    </Menu.Group>
+                  </Pane>
+                  <Pane>
+                    <Menu.Group>
+                      <Menu.Item
+                        onSelect={this._handleAddNoteButton}
+                        icon="edit"
+                      >
+                        새 노트 작성하기
+                      </Menu.Item>
+                    </Menu.Group>
+                  </Pane>
+                </Menu>
+              </Pane>
+            </SideSheet>
+            <Pane display="flex" flexDirection="column" height="100%">
+              <Pane
+                display="flex"
+                justifyContent="space-between"
+                marginX={majorScale(2)}
+                marginTop={majorScale(2)}
+              >
+                <IconButton
+                  appearance="minimal"
+                  icon="menu"
+                  iconSize={18}
+                  onClick={() => this.setState({ isShown: true })}
                 />
-              )}
+                <Popover
+                  content={
+                    <Menu>
+                      <Menu.Group>
+                        <Menu.Item
+                          icon="delete"
+                          onSelect={() =>
+                            this._handleNoteDelete({
+                              noteId: this.state.selected
+                            })
+                          }
+                        >
+                          노트 삭제
+                        </Menu.Item>
+                      </Menu.Group>
+                    </Menu>
+                  }
+                >
+                  <IconButton appearance="minimal" icon="more" iconSize={18} />
+                </Popover>
+              </Pane>
+              <Pane
+                paddingX={this.props.isMobile ? 15 : 0}
+                width={this.props.isMobile ? "100%" : mobileWidth}
+                marginX="auto"
+                paddingTop={15}
+              >
+                <Pane marginBottom={20}>
+                  <Heading size={900}>
+                    {isLoading ? (
+                      <Text>title..</Text>
+                    ) : (
+                      <Editor
+                        placeholder="Title here.."
+                        value={title}
+                        onKeyDown={this._handleEditorKeyDown}
+                        onChange={({ value }) => {
+                          this._handleTitleChange({ value });
+                        }}
+                      />
+                    )}
+                  </Heading>
+                </Pane>
+                <Pane flex={1} overflowY="auto">
+                  {isLoading ? (
+                    <Text>content..</Text>
+                  ) : (
+                    <Editor
+                      placeholder="Content here.."
+                      value={content}
+                      style={{ height: "100%" }}
+                      onChange={({ value }) =>
+                        this._handleContentChange({ value })
+                      }
+                    />
+                  )}
+                </Pane>
+              </Pane>
             </Pane>
           </Pane>
-        </Pane>
-      </Pane>
+        )}
+      </React.Fragment>
     );
   }
 }

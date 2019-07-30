@@ -23,6 +23,7 @@ class SignInPage extends Component {
   _handleChange = ({ target: { name, value } }) => {
     this.setState({ [name]: value });
   };
+  
   render() {
     return (
       <Pane background="tint1" height="100%" paddingTop={50}>
