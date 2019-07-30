@@ -79,7 +79,7 @@ class SignUpPage extends Component {
             <Button
               appearance="primary"
               intent="none"
-              onClick={() => this._handleSignup()}
+              onClick={this._handleSignup}
             >
               가입하기
             </Button>

@@ -7,7 +7,9 @@ import {
   Menu,
   Text,
   Avatar,
-  Popover
+  Popover,
+  Button,
+  IconButton
 } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
@@ -15,6 +17,7 @@ import Plain from "slate-plain-serializer";
 import uuid from "uuid/v4";
 import firebase, { db } from "../db";
 import { withRouter } from "react-router-dom";
+import { majorScale } from "evergreen-ui/commonjs/scales";
 
 const initialValue = {
   document: {
@@ -40,7 +43,8 @@ class NotePage extends Component {
     title: {},
     content: {},
     isLoading: true,
-    username: ""
+    username: "",
+    isDeleteOpen: false
   };
 
   async componentDidMount() {
@@ -52,7 +56,7 @@ class NotePage extends Component {
       let res = await db
         .collection("notes")
         .where("user", "==", user.email)
-        .orderBy("createdAt")
+        .orderBy("createdAt", "desc")
         .limit(20)
         .get();
 
@@ -68,6 +72,7 @@ class NotePage extends Component {
             content: Value.fromJSON(JSON.parse(note.content))
           };
         });
+
         let latestNote = Object.values(notes)[0];
         this.setState({
           selected: latestNote.id,
@@ -82,9 +87,9 @@ class NotePage extends Component {
         username: user.displayName,
         email: user.email
       });
-    }
+    } 
   }
-  _handleAddNoteButton = async ({ email }) => {
+  _handleAddNoteButton = async ({ email }={ email: null}) => {
     let id = uuid();
     const newNote = {
       id,
@@ -93,14 +98,20 @@ class NotePage extends Component {
       createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
       user: email || this.state.email
     };
-    await db
+
+    try {
+      await db
       .collection("notes")
       .doc(id)
       .set({
         ...newNote,
         title: JSON.stringify(newNote.title.toJSON()),
         content: JSON.stringify(newNote.content.toJSON())
-      });
+      });  
+    } catch (error) {
+      console.log(error)
+    }
+    
 
     this.setState({
       notes: { ...this.state.notes, [id]: newNote },
@@ -169,13 +180,48 @@ class NotePage extends Component {
       return next();
     }
   };
+
+  _handleNoteDelete = async ({ noteId }) => {
+    try {
+      await db.collection("notes").doc(noteId).delete()
+      if (Object.keys(this.state.notes).length === 1) {
+        this.setState({ notes: {} })
+        await this._handleAddNoteButton();
+      } else {
+        let updatedNotes = { ...this.state.notes };
+        let updatedNotesArray = Object.values(updatedNotes).sort(
+          (a, b) => b.createdAt.seconds - a.createdAt.seconds
+        );
+
+        let deletedIndex = 0;
+        updatedNotesArray.forEach((note, index) => {
+          if (note.id === noteId) {
+            deletedIndex = index;
+            return;
+          }
+        });
+        updatedNotesArray.splice(deletedIndex, 1);
+        let newSelectedIndex = deletedIndex - 1 >= 0 ? deletedIndex - 1 : 0;
+        delete updatedNotes[noteId];
+
+        this.setState({
+          notes: updatedNotes,
+          selected: updatedNotesArray[newSelectedIndex].id,
+          title: updatedNotesArray[newSelectedIndex].title,
+          content: updatedNotesArray[newSelectedIndex].content
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   render() {
     const { notes, title, content, isLoading, username } = this.state;
     return (
       <Pane display="flex" height="100%">
         <Pane width={240} height="100%" background="tint1" className="sidebar">
+          {/* display: flex */}
           <Menu>
-            {/* display: flex */}
             <Pane>
               <Menu.Group>
                 <Popover
@@ -213,7 +259,7 @@ class NotePage extends Component {
                 {Object.values(notes).map(note => (
                   <Menu.Item
                     key={note.id}
-                    onSelect={() => this._handleNoteSelect(note.id)}
+                    // onSelect={() => this._handleNoteSelect(note.id)}
                   >
                     {Plain.serialize(note.title) || "제목 없음"}
                   </Menu.Item>
@@ -232,11 +278,35 @@ class NotePage extends Component {
         <Pane height="100%" flex={1}>
           <Pane
             display="flex"
+            justifyContent="space-between"
+            marginX={majorScale(2)}
+            marginTop={majorScale(2)}
+          >
+            <IconButton appearance="minimal" icon="menu" iconSize={18} />
+            <Popover
+              content={
+                <Menu>
+                  <Menu.Group>
+                    <Menu.Item
+                      icon="delete"
+                      onSelect={() => this._handleNoteDelete({ noteId: this.state.selected })}
+                    >
+                      노트 삭제
+                    </Menu.Item>
+                  </Menu.Group>
+                </Menu>
+              }
+            >
+              <IconButton appearance="minimal" icon="more" iconSize={18}/>
+            </Popover>
+          </Pane> 
+          <Pane
+            display="flex"
             flexDirection="column"
             height="100%"
             width={730}
             margin="auto"
-            paddingTop={50}
+            paddingTop={15}
           >
             <Pane marginBottom={20}>
               <Heading size={900}>
@@ -255,9 +325,9 @@ class NotePage extends Component {
               </Heading>
             </Pane>
             <Pane
-            flex={1}
-            // overflowX="hidden"
-            overflowY="auto"
+              flex={1}
+              // overflowX="hidden"
+              overflowY="auto"
             >
               {isLoading ? (
                 <Text>content..</Text>

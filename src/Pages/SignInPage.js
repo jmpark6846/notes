@@ -67,7 +67,7 @@ class SignInPage extends Component {
             <Button
               appearance="primary"
               intent="none"
-              onClick={() => this._handleSignin()}
+              onClick={this._handleSignin}
             >
               로그인
             </Button>
