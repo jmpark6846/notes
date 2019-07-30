@@ -40,7 +40,7 @@ const initialValue = {
   }
 };
 
-const mobileWidth = 730
+const mobileWidth = 730;
 class NotePage extends Component {
   state = {
     selected: "",
@@ -130,7 +130,8 @@ class NotePage extends Component {
     this.setState({
       selected: noteId,
       title: this.state.notes[noteId].title,
-      content: this.state.notes[noteId].content
+      content: this.state.notes[noteId].content,
+      isShown: false
     });
   };
 
@@ -230,6 +231,7 @@ class NotePage extends Component {
         <SideSheet
           position={Position.LEFT}
           isShown={this.state.isShown}
+          width={this.props.isMobile ? this.props.width - 70 : 250}
           onCloseComplete={() => this.setState({ isShown: false })}
         >
           <Pane height="100%" background="tint1" className="sidebar">
@@ -276,7 +278,7 @@ class NotePage extends Component {
                   {Object.values(notes).map(note => (
                     <Menu.Item
                       key={note.id}
-                      // onSelect={() => this._handleNoteSelect(note.id)}
+                      onSelect={() => this._handleNoteSelect(note.id)}
                     >
                       {Plain.serialize(note.title) || "제목 없음"}
                     </Menu.Item>
@@ -293,7 +295,7 @@ class NotePage extends Component {
             </Menu>
           </Pane>
         </SideSheet>
-        <Pane height="100%">
+        <Pane display="flex" flexDirection="column" height="100%">
           <Pane
             display="flex"
             justifyContent="space-between"
@@ -326,12 +328,9 @@ class NotePage extends Component {
             </Popover>
           </Pane>
           <Pane
-            display="flex"
-            flexDirection="column"
-            height="100%"
-            paddingX={ this.props.isMobile ? 15 : 0}
-            width={ this.props.isMobile ? "100%" : mobileWidth}
-            margin="auto"
+            paddingX={this.props.isMobile ? 15 : 0}
+            width={this.props.isMobile ? "100%" : mobileWidth}
+            marginX="auto"
             paddingTop={15}
           >
             <Pane marginBottom={20}>
@@ -350,11 +349,7 @@ class NotePage extends Component {
                 )}
               </Heading>
             </Pane>
-            <Pane
-              flex={1}
-              // overflowX="hidden"
-              overflowY="auto"
-            >
+            <Pane flex={1} overflowY="auto">
               {isLoading ? (
                 <Text>content..</Text>
               ) : (
@@ -374,6 +369,6 @@ class NotePage extends Component {
 }
 
 export default compose(
-  withSizes(({ width }) => ({ isMobile: width < mobileWidth })),
+  withSizes(({ width }) => ({ isMobile: width < mobileWidth, width })),
   withRouter
 )(NotePage);
