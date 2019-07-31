@@ -1,8 +1,12 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
+import withSizes from "react-sizes";
+import { compose } from "recompose";
+
 import { Pane, TextInput, Heading, Button, Text } from "evergreen-ui";
 
 import firebase from "../db";
+import { MOBILE_WIDTH } from "../common";
 
 class SignInPage extends Component {
   state = {
@@ -34,9 +38,9 @@ class SignInPage extends Component {
           background="white"
           marginX="auto"
           paddingY={30}
-          paddingX={50}
+          paddingX={ this.props.isMobile ? 15 : 50}
           elevation={3}
-          width={400}
+          width={ this.props.isMobile ? 'calc(100% - 30px)' : 400}
           border="default"
         >
           <Heading size={600} marginBottom={20} textAlign="center">
@@ -82,4 +86,7 @@ class SignInPage extends Component {
   }
 }
 
-export default withRouter(SignInPage);
+export default compose(
+  withSizes(({ width }) => ({ isMobile: width < MOBILE_WIDTH })),
+  withRouter
+)(SignInPage);

@@ -22,6 +22,7 @@ import { Value } from "slate";
 import Plain from "slate-plain-serializer";
 
 import firebase, { db } from "../db";
+import { MOBILE_WIDTH } from "../common";
 
 const initialValue = {
   document: {
@@ -40,7 +41,6 @@ const initialValue = {
   }
 };
 
-const mobileWidth = 730;
 
 class NotePage extends Component {
   state = {
@@ -356,7 +356,7 @@ class NotePage extends Component {
               </Pane>
               <Pane
                 paddingX={this.props.isMobile ? 15 : 0}
-                width={this.props.isMobile ? "100%" : mobileWidth}
+                width={this.props.isMobile ? "100%" : MOBILE_WIDTH}
                 marginX="auto"
                 paddingTop={15}
               >
@@ -400,6 +400,6 @@ class NotePage extends Component {
 }
 
 export default compose(
-  withSizes(({ width }) => ({ isMobile: width < mobileWidth, width })),
+  withSizes(({ width }) => ({ isMobile: width < MOBILE_WIDTH, width })),
   withRouter
 )(NotePage);
