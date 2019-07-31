@@ -302,7 +302,7 @@ class NotePage extends Component {
                           key={note.id}
                           onSelect={() => this._handleNoteSelect(note.id)}
                         >
-                          {Plain.serialize(note.title) || "제목 없음"}
+                          <Text fontWeight={ note.id === this.state.selected ? 700 : 500 }>{Plain.serialize(note.title) || "제목 없음"}</Text>
                         </Menu.Item>
                       ))}
                     </Menu.Group>

@@ -4,7 +4,7 @@ import withSizes from "react-sizes";
 import { compose } from "recompose";
 import { Pane, TextInput, Heading, Button, Text } from "evergreen-ui";
 
-import firebase from "../db";
+import firebase, { db } from "../db";
 import { MOBILE_WIDTH } from "../common";
 
 
@@ -23,6 +23,12 @@ class SignUpPage extends Component {
       await user.updateProfile({
         displayName: this.state.username
       });
+
+      await db.collection("users").doc(user.uid).set({
+        uid: user.uid,
+        email: user.email
+      })
+
       this.props.history.push("/");
     } catch (error) {
       console.log(error);
