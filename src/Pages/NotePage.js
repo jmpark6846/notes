@@ -199,7 +199,12 @@ class NotePage extends Component {
       return next();
     }
   };
-
+  _getNotesArraySorted = () => {
+    let notesArray = Object.values(this.state.notes).sort(
+      (a, b) => b.createdAt.seconds - a.createdAt.seconds
+    );
+    return notesArray
+  }
   _handleNoteDelete = async ({ noteId }) => {
     try {
       await db
@@ -299,7 +304,7 @@ class NotePage extends Component {
                     overflowY="auto"
                   >
                     <Menu.Group>
-                      {Object.values(notes).map(note => (
+                      {this._getNotesArraySorted().map(note => (
                         <Menu.Item
                           key={note.id}
                           onSelect={() => this._handleNoteSelect(note.id)}
