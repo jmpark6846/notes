@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { Pane, TextInput, Heading, Button, Text } from "evergreen-ui";
 import { withRouter } from "react-router-dom";
+import { Pane, TextInput, Heading, Button, Text } from "evergreen-ui";
 
 import firebase from "../db";
 
@@ -8,18 +8,20 @@ class SignUpPage extends Component {
   state = {
     email: "",
     password: "",
-    username:"",
-    errorMessage: "",
+    username: "",
+    errorMessage: ""
   };
   _handleSignup = async () => {
     try {
-      let { user } = await firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)  
+      let { user } = await firebase
+        .auth()
+        .createUserWithEmailAndPassword(this.state.email, this.state.password);
       await user.updateProfile({
-        displayName:this.state.username
-      })
-      this.props.history.push('/')
+        displayName: this.state.username
+      });
+      this.props.history.push("/");
     } catch (error) {
-      console.log(error)
+      console.log(error);
       this.setState({ errorMessage: error.message });
     }
   };
@@ -70,12 +72,17 @@ class SignUpPage extends Component {
             value={this.state.username}
             required
           />
-          
+
           <Pane intent="danger" padding={10}>
             <Text color="red">{this.state.errorMessage}</Text>
           </Pane>
           <Pane display="flex" justifyContent="flex-end" marginTop={20}>
-            <Button marginRight={10} onClick={()=>this.props.history.push('/signin')}>돌아가기</Button>
+            <Button
+              marginRight={10}
+              onClick={() => this.props.history.push("/signin")}
+            >
+              돌아가기
+            </Button>
             <Button
               appearance="primary"
               intent="none"
@@ -90,4 +97,4 @@ class SignUpPage extends Component {
   }
 }
 
-export default withRouter(SignUpPage)
+export default withRouter(SignUpPage);

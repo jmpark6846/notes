@@ -1,7 +1,9 @@
 import React, { Component } from "react";
-import { debounce } from "lodash";
+import { withRouter } from "react-router-dom";
 import withSizes from "react-sizes";
 import { compose } from "recompose";
+import { debounce } from "lodash";
+import uuid from "uuid/v4";
 import {
   Pane,
   Heading,
@@ -12,15 +14,14 @@ import {
   IconButton,
   SideSheet,
   Position,
-  Spinner
+  Spinner,
+  majorScale
 } from "evergreen-ui";
 import { Editor } from "slate-react";
 import { Value } from "slate";
 import Plain from "slate-plain-serializer";
-import uuid from "uuid/v4";
+
 import firebase, { db } from "../db";
-import { withRouter } from "react-router-dom";
-import { majorScale } from "evergreen-ui/commonjs/scales";
 
 const initialValue = {
   document: {
@@ -54,21 +55,20 @@ class NotePage extends Component {
   componentWillUnmount() {
     this._ismounted = false;
   }
-  
+
   async componentDidMount() {
-    const that = this
+    const that = this;
     this._ismounted = true;
-    
+
     firebase.auth().onAuthStateChanged(user => {
-      if (user && that._ismounted) { 
-        that.setState({ user })
+      if (user && that._ismounted) {
+        that.setState({ user });
       }
     });
   }
   async componentDidUpdate(prevProps, prevState) {
-  
     if (prevState.user == null && this.state.user != null) {
-      let { user } = this.state
+      let { user } = this.state;
       let res = await db
         .collection("notes")
         .where("user", "==", user.email)
@@ -239,7 +239,7 @@ class NotePage extends Component {
     const { notes, title, content, isLoading, user } = this.state;
     return (
       <React.Fragment>
-        { !user ? (
+        {!user ? (
           <Pane
             display="flex"
             alignItems="center"
@@ -248,7 +248,7 @@ class NotePage extends Component {
           >
             <Spinner />
           </Pane>
-        ):(
+        ) : (
           <Pane height="100%">
             <SideSheet
               position={Position.LEFT}

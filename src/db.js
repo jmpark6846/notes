@@ -2,7 +2,7 @@ import firebase from "firebase/app";
 import "firebase/firestore"
 import "firebase/auth"
 
-// firebase api 설정 값들은 public값이므로 숨길 필요가 없음
+// firebase api 설정 값들은 public값이므로 숨길 필요가 없다. .env 에 시크릿 값을 적어도 빌드 시 노출된다.
 firebase.initializeApp({
   apiKey: "AIzaSyD70mOFNDK4VjoQOw9JBItSw0_aME3EeWw",
   authDomain: "notes-d5c0d.firebaseapp.com",

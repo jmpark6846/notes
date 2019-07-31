@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { Pane, TextInput, Heading, Button, Text } from "evergreen-ui";
+
 import firebase from "../db";
 
 class SignInPage extends Component {
@@ -9,6 +10,7 @@ class SignInPage extends Component {
     password: "",
     errorMessage: ""
   };
+
   _handleSignin = async () => {
     try {
       await firebase
@@ -20,6 +22,7 @@ class SignInPage extends Component {
       this.setState({ errorMessage: error.message });
     }
   };
+
   _handleChange = ({ target: { name, value } }) => {
     this.setState({ [name]: value });
   };
