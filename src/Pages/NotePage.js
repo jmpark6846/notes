@@ -23,6 +23,7 @@ import Plain from "slate-plain-serializer";
 
 import firebase, { db } from "../db";
 import { MOBILE_WIDTH } from "../common";
+import { userContext } from "../Context";
 
 const initialValue = {
   document: {
@@ -41,71 +42,53 @@ const initialValue = {
   }
 };
 
-
 class NotePage extends Component {
+  static contextType = userContext;
   state = {
     selected: "",
     notes: {},
     title: {},
     content: {},
     isLoading: true,
-    isShown: false,
-    user: null
+    isShown: false
   };
-  componentWillUnmount() {
-    this._ismounted = false;
-  }
 
   async componentDidMount() {
-    const that = this;
-    this._ismounted = true;
+    const user = this.context;
+    let res = await db
+      .collection("notes")
+      .where("user", "==", user.email)
+      .orderBy("createdAt", "desc")
+      .limit(20)
+      .get();
 
-    // firebase.auth().onAuthStateChanged(user => {
-    //   if (user && that._ismounted) {
-    //     that.setState({ user });
-    //   } else {
-    //     that.props.history.push('/signin')
-    //   }
-    // });
-  }
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState.user == null && this.state.user != null) {
-      let { user } = this.state;
-      let res = await db
-        .collection("notes")
-        .where("user", "==", user.email)
-        .orderBy("createdAt", "desc")
-        .limit(20)
-        .get();
+    let notes = {};
+    if (res.size === 0) {
+      await this._handleAddNoteButton({ email: user.email });
+    } else {
+      res.forEach(doc => {
+        let note = doc.data();
+        notes[note.id] = {
+          ...note,
+          title: Value.fromJSON(JSON.parse(note.title)),
+          content: Value.fromJSON(JSON.parse(note.content))
+        };
+      });
 
-      let notes = {};
-      if (res.size === 0) {
-        await this._handleAddNoteButton({ email: user.email });
-      } else {
-        res.forEach(doc => {
-          let note = doc.data();
-          notes[note.id] = {
-            ...note,
-            title: Value.fromJSON(JSON.parse(note.title)),
-            content: Value.fromJSON(JSON.parse(note.content))
-          };
-        });
-
-        let latestNote = Object.values(notes)[0];
-        this.setState({
-          selected: latestNote.id,
-          title: latestNote.title || initialValue,
-          content: latestNote.content || initialValue,
-          notes
-        });
-      }
-
+      let latestNote = Object.values(notes)[0];
       this.setState({
-        isLoading: false,
-        username: user.displayName,
-        email: user.email
+        selected: latestNote.id,
+        title: latestNote.title || initialValue,
+        content: latestNote.content || initialValue,
+        notes
       });
     }
+
+    this.setState({
+      isLoading: false,
+      username: user.displayName,
+      email: user.email
+    });
   }
   _handleAddNoteButton = async ({ email } = { email: null }) => {
     let id = uuid();
@@ -114,7 +97,7 @@ class NotePage extends Component {
       title: Plain.deserialize(""),
       content: Plain.deserialize(""),
       createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      user: email || this.state.user.email
+      user: email || this.context.email
     };
 
     try {
@@ -203,8 +186,8 @@ class NotePage extends Component {
     let notesArray = Object.values(this.state.notes).sort(
       (a, b) => b.createdAt.seconds - a.createdAt.seconds
     );
-    return notesArray
-  }
+    return notesArray;
+  };
   _handleNoteDelete = async ({ noteId }) => {
     try {
       await db
@@ -243,7 +226,9 @@ class NotePage extends Component {
     }
   };
   render() {
-    const { notes, title, content, isLoading, user } = this.state;
+    const { notes, title, content, isLoading } = this.state;
+    const user = this.context;
+    
     return (
       <React.Fragment>
         {!user ? (
@@ -309,7 +294,13 @@ class NotePage extends Component {
                           key={note.id}
                           onSelect={() => this._handleNoteSelect(note.id)}
                         >
-                          <Text fontWeight={ note.id === this.state.selected ? 700 : 500 }>{Plain.serialize(note.title) || "제목 없음"}</Text>
+                          <Text
+                            fontWeight={
+                              note.id === this.state.selected ? 700 : 500
+                            }
+                          >
+                            {Plain.serialize(note.title) || "제목 없음"}
+                          </Text>
                         </Menu.Item>
                       ))}
                     </Menu.Group>
@@ -391,8 +382,8 @@ class NotePage extends Component {
                     <Editor
                       placeholder="Content here.."
                       value={content}
-                          spellCheck={false}
-                      style={{ height: "100%", lineHeight: 1.3}}
+                      spellCheck={false}
+                      style={{ height: "100%", lineHeight: 1.3 }}
                       onChange={({ value }) =>
                         this._handleContentChange({ value })
                       }

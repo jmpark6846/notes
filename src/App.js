@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import NotePage from "./Pages/NotePage";
 import SignInPage from "./Pages/SignInPage";
@@ -6,6 +6,7 @@ import SignUpPage from "./Pages/SignUpPage";
 import "./App.css";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import { auth } from "./db";
+import { userContext } from "./Context";
 
 const initialValue = {
   uid: null,
@@ -13,25 +14,25 @@ const initialValue = {
   username: null,
   isLoggedIn: false,
 }
-export const userContext = React.createContext(initialValue);
 
+  
 function App() {
   const [user, setUser] = useState(initialValue);
-
   auth.onAuthStateChanged(firebaseUser => {
     if (firebaseUser) {
-      setUser({
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        username: firebaseUser.displayName,
-        isLoggedIn: true,
-      });
+      if (user.uid !== firebaseUser.uid) {
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          username: firebaseUser.displayName,
+          isLoggedIn: true,
+        });  
+      }
     } else {
       setUser(null);
     }
   });
 
-  console.log(user)
   return (
     <userContext.Provider value={ user }>
       <Router>
