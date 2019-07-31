@@ -14,7 +14,6 @@ class SignInPage extends Component {
     password: "",
     errorMessage: ""
   };
-
   _handleSignin = async () => {
     try {
       await firebase
@@ -30,7 +29,7 @@ class SignInPage extends Component {
   _handleChange = ({ target: { name, value } }) => {
     this.setState({ [name]: value });
   };
-  
+
   render() {
     return (
       <Pane background="tint1" height="100%" paddingTop={50}>
@@ -38,9 +37,9 @@ class SignInPage extends Component {
           background="white"
           marginX="auto"
           paddingY={30}
-          paddingX={ this.props.isMobile ? 15 : 50}
+          paddingX={this.props.isMobile ? 15 : 50}
           elevation={3}
-          width={ this.props.isMobile ? 'calc(100% - 30px)' : 400}
+          width={this.props.isMobile ? "calc(100% - 30px)" : 400}
           border="default"
         >
           <Heading size={600} marginBottom={20} textAlign="center">
@@ -71,7 +70,9 @@ class SignInPage extends Component {
             <Button
               marginRight={10}
               onClick={() => this.props.history.push("/signup")}
-            >회원가입</Button>
+            >
+              회원가입
+            </Button>
             <Button
               appearance="primary"
               intent="none"

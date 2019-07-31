@@ -6,6 +6,7 @@ https://notes-d5c0d.web.app/
 
 ## 특이사항
 - `create-react-app`으로 제작. `react-router`, `recompose` 등 사용
+- 리엑트 `setState` hook과 context api를 사용하여 인증 정보 관리.
 - 노트 작성 후 500ms 지나면 자동 저장. 리엑트 컴포넌트의 `onChange` 이벤트 핸들러와 [lodash.debounce](https://lodash.com/docs/4.17.15#debounce) 사용
 - `react-sizes` 활용한 responsive layout. 
 - 로그인, 회원가입 등 인증 기능에 Firebase의 authentication api 사용

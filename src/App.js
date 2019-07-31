@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import NotePage from "./Pages/NotePage";
 import SignInPage from "./Pages/SignInPage";
@@ -6,35 +6,28 @@ import SignUpPage from "./Pages/SignUpPage";
 import "./App.css";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import { auth } from "./db";
-import { userContext } from "./Context";
+import { userContext, initialUser } from "./Context";
 
-const initialValue = {
-  uid: null,
-  email: null,
-  username: null,
-  isLoggedIn: false,
-}
-
-  
 function App() {
-  const [user, setUser] = useState(initialValue);
+  const [user, setUser] = useState(initialUser);
   auth.onAuthStateChanged(firebaseUser => {
-    if (firebaseUser) {
-      if (user.uid !== firebaseUser.uid) {
+    if (!user.isLoggedIn) {
+      if (firebaseUser) {
         setUser({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           username: firebaseUser.displayName,
           isLoggedIn: true,
-        });  
+          isLoading: false
+        });
+      } else {
+        setUser(initialUser);
       }
-    } else {
-      setUser(null);
     }
   });
 
   return (
-    <userContext.Provider value={ user }>
+    <userContext.Provider value={user}>
       <Router>
         <ProtectedRoute exact path="/" component={NotePage} />
         <Route path="/signin" component={SignInPage} />
@@ -43,6 +36,5 @@ function App() {
     </userContext.Provider>
   );
 }
-
 
 export default App;
