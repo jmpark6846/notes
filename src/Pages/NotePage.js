@@ -60,13 +60,13 @@ class NotePage extends Component {
     const that = this;
     this._ismounted = true;
 
-    firebase.auth().onAuthStateChanged(user => {
-      if (user && that._ismounted) {
-        that.setState({ user });
-      } else {
-        that.props.history.push('/signin')
-      }
-    });
+    // firebase.auth().onAuthStateChanged(user => {
+    //   if (user && that._ismounted) {
+    //     that.setState({ user });
+    //   } else {
+    //     that.props.history.push('/signin')
+    //   }
+    // });
   }
   async componentDidUpdate(prevProps, prevState) {
     if (prevState.user == null && this.state.user != null) {
