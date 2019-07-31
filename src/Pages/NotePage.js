@@ -370,6 +370,7 @@ class NotePage extends Component {
                       <Editor
                         placeholder="Title here.."
                         value={title}
+                        spellCheck={false}
                         onKeyDown={this._handleEditorKeyDown}
                         onChange={({ value }) => {
                           this._handleTitleChange({ value });
@@ -385,7 +386,8 @@ class NotePage extends Component {
                     <Editor
                       placeholder="Content here.."
                       value={content}
-                      style={{ height: "100%" }}
+                          spellCheck={false}
+                      style={{ height: "100%", lineHeight: 1.3}}
                       onChange={({ value }) =>
                         this._handleContentChange({ value })
                       }
