@@ -14,33 +14,15 @@ import {
   IconButton,
   SideSheet,
   Position,
-  majorScale
+  majorScale,
+  TextInput
 } from "evergreen-ui";
-import { Editor } from "slate-react";
-import { Value } from "slate";
-import Plain from "slate-plain-serializer";
-
-import firebase, { db } from "../db";
+import { Editor } from "react-draft-wysiwyg";
+import "../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import { EditorState, convertFromRaw, convertToRaw } from "draft-js";
+import firebase, { db, auth } from "../db";
 import { MOBILE_WIDTH } from "../common";
 import { userContext } from "../Context";
-
-
-const initialValue = {
-  document: {
-    nodes: [
-      {
-        object: "block",
-        type: "paragraph",
-        nodes: [
-          {
-            object: "text",
-            text: "A line of text in a paragraph."
-          }
-        ]
-      }
-    ]
-  }
-};
 
 class NotePage extends Component {
   static contextType = userContext;
@@ -48,7 +30,7 @@ class NotePage extends Component {
     selected: "",
     notes: {},
     title: {},
-    content: {},
+    content: EditorState.createEmpty(),
     isLoading: true,
     isShown: false
   };
@@ -63,41 +45,41 @@ class NotePage extends Component {
       .get();
 
     let notes = {};
+    let latestNote = null;
     if (res.size === 0) {
-      await this._handleAddNoteButton({ email: user.email });
+      await this._handleAddNoteButton();
     } else {
       res.forEach(doc => {
-        let note = doc.data();
-        notes[note.id] = {
-          ...note,
-          title: Value.fromJSON(JSON.parse(note.title)),
-          content: Value.fromJSON(JSON.parse(note.content))
+        let { id, title, createdAt, content } = doc.data();
+        if (latestNote == null) {
+          latestNote = { id, title, createdAt, content };
+        }
+        notes[id] = {
+          id,
+          title,
+          createdAt
         };
       });
-
-      let latestNote = Object.values(notes)[0];
       this.setState({
         selected: latestNote.id,
-        title: latestNote.title || initialValue,
-        content: latestNote.content || initialValue,
+        title: latestNote.title,
+        content: EditorState.createWithContent(
+          convertFromRaw(latestNote.content)
+        ),
+        isLoading: false,
         notes
       });
     }
-
-    this.setState({
-      isLoading: false,
-      username: user.displayName,
-      email: user.email
-    });
   }
-  _handleAddNoteButton = async ({ email } = { email: null }) => {
+
+  _handleAddNoteButton = async () => {
     let id = uuid();
     const newNote = {
       id,
-      title: Plain.deserialize(""),
-      content: Plain.deserialize(""),
+      title: "",
+      content: EditorState.createEmpty(),
       createdAt: firebase.firestore.Timestamp.fromDate(new Date()),
-      user: email || this.context.email
+      user: this.context.email
     };
 
     try {
@@ -106,8 +88,8 @@ class NotePage extends Component {
         .doc(id)
         .set({
           ...newNote,
-          title: JSON.stringify(newNote.title.toJSON()),
-          content: JSON.stringify(newNote.content.toJSON())
+          title: newNote.title,
+          content: convertToRaw(newNote.content.getCurrentContent())
         });
     } catch (error) {
       console.log(error);
@@ -118,15 +100,22 @@ class NotePage extends Component {
       selected: id,
       title: newNote.title,
       content: newNote.content,
-      isShown: false
+      isShown: false,
+      isLoading: false
     });
   };
 
-  _handleNoteSelect = noteId => {
+  _handleNoteSelect = async noteId => {
+    const res = await db
+      .collection("notes")
+      .doc(noteId)
+      .get();
+    const note = res.data();
+    console.log(note);
     this.setState({
-      selected: noteId,
-      title: this.state.notes[noteId].title,
-      content: this.state.notes[noteId].content,
+      selected: note.id,
+      title: note.title,
+      content: EditorState.createWithContent(convertFromRaw(note.content)),
       isShown: false
     });
   };
@@ -136,58 +125,35 @@ class NotePage extends Component {
       .collection("notes")
       .doc(this.state.selected)
       .update({
-        title: JSON.stringify(this.state.title.toJSON()),
-        content: JSON.stringify(this.state.content.toJSON())
+        title: this.state.title,
+        content: convertToRaw(this.state.content.getCurrentContent())
       })
       .catch(error => console.log("error updating doc: " + error));
   }, 500);
 
-  _handleTitleChange = ({ value }) => {
-    const newNotes = {
-      ...this.state.notes,
-      [this.state.selected]: {
-        ...this.state.notes[this.state.selected],
-        title: value
-      }
-    };
-    this.setState({ notes: newNotes, title: value });
-    this._autoSave();
-  };
-
-  _handleContentChange = ({ value }) => {
-    const newNotes = {
-      ...this.state.notes,
-      [this.state.selected]: {
-        ...this.state.notes[this.state.selected],
-        content: value
-      }
-    };
-    this.setState({ notes: newNotes, content: value });
-    this._autoSave();
+  _handleContentChange = editorState => {
+    if (this.state.content != editorState) {
+      this.setState({ content: editorState });
+      this._autoSave();
+    }
   };
 
   _handleLogOut = async () => {
     try {
-      await firebase.auth().signOut();
+      await auth.signOut();
       this.props.history.push("/signin");
     } catch (err) {
       console.log(err);
     }
   };
 
-  _handleEditorKeyDown = (event, editor, next) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-    } else {
-      return next();
-    }
-  };
   _getNotesArraySorted = () => {
     let notesArray = Object.values(this.state.notes).sort(
       (a, b) => b.createdAt.seconds - a.createdAt.seconds
     );
     return notesArray;
   };
+
   _handleNoteDelete = async ({ noteId }) => {
     try {
       await db
@@ -226,9 +192,8 @@ class NotePage extends Component {
     }
   };
   render() {
-    const { notes, title, content, isLoading } = this.state;
     const user = this.context;
-
+    const { notes, selected } = this.state
     return (
       <Pane height="100%">
         <SideSheet
@@ -286,7 +251,7 @@ class NotePage extends Component {
                       <Text
                         fontWeight={note.id === this.state.selected ? 700 : 500}
                       >
-                        {Plain.serialize(note.title) || "제목 없음"}
+                        {note.title || "제목 없음"}
                       </Text>
                     </Menu.Item>
                   ))}
@@ -344,31 +309,44 @@ class NotePage extends Component {
           >
             <Pane marginBottom={20}>
               <Heading size={900}>
-                {isLoading ? (
-                  <Text>title..</Text>
+                {this.state.isLoading ? (
+                  <Text fontWeight={500} fontSize={majorScale(3)}>
+                    제목 없음..
+                  </Text>
                 ) : (
-                  <Editor
-                    placeholder="Title here.."
-                    value={title}
-                    spellCheck={false}
-                    onKeyDown={this._handleEditorKeyDown}
-                    onChange={({ value }) => {
-                      this._handleTitleChange({ value });
-                    }}
+                  <TextInput
+                    padding={0}
+                    width="100%"
+                    className="title-input"
+                    boxShadow="none"
+                    fontWeight={500}
+                    fontSize={majorScale(3)}
+                    value={this.state.title}
+                    onChange={e =>
+                      this.setState({
+                        notes: {
+                          ...this.state.notes,
+                          [selected]: {
+                            ...this.state.notes[selected],
+                            title: e.target.value
+                          }
+                        },
+                        title: e.target.value
+                      })
+                    }
                   />
                 )}
               </Heading>
             </Pane>
             <Pane flex={1} overflowY="auto">
-              {isLoading ? (
+              {this.state.isLoading ? (
                 <Text>content..</Text>
               ) : (
-                <Editor
-                  placeholder="Content here.."
-                  value={content}
-                  spellCheck={false}
-                  style={{ height: "100%", lineHeight: 1.3 }}
-                  onChange={({ value }) => this._handleContentChange({ value })}
+                  <Editor
+                    placeholder="content here.."
+                    editorState={this.state.content}
+                    toolbarHidden={true}
+                  onEditorStateChange={this._handleContentChange}
                 />
               )}
             </Pane>

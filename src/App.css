@@ -8,3 +8,7 @@
   flex: 1 0;
   height: 100%;
 }
+
+.title-input:focus{
+  box-shadow: none;
+}
