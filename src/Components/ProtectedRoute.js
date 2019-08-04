@@ -23,5 +23,5 @@ function ProtectedRoute({ component: Component, ...rest }) {
     </userContext.Consumer>
   );
 }
-
+ 
 export default ProtectedRoute;

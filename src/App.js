@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import NotePage from "./Pages/NotePage";
 import SignInPage from "./Pages/SignInPage";
@@ -10,22 +10,32 @@ import { userContext, initialUser } from "./Context";
 
 function App() {
   const [user, setUser] = useState(initialUser);
-  auth.onAuthStateChanged(firebaseUser => {
-    if (!user.isLoggedIn) {
-      if (firebaseUser) {
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          username: firebaseUser.displayName,
-          isLoggedIn: true,
-          isLoading: false
-        });
-      } else {
-        setUser(initialUser);
-      }
-    }
-  });
 
+  useEffect(() => {
+    auth.onAuthStateChanged(firebaseUser => {
+      if (firebaseUser) {
+        if (!user.isLoggedIn) {
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            username: firebaseUser.displayName,
+            isLoggedIn: true,
+            isLoading: false
+          });
+        }
+      } else {
+        if (user.isLoading) {
+          setUser({
+            ...initialUser,
+            isLoading: false
+          });  
+        }
+        console.log(firebaseUser);
+      }
+    });
+  
+  }, [user])
+  
   return (
     <userContext.Provider value={user}>
       <Router>
