@@ -12,14 +12,14 @@ https://notes-d5c0d.web.app/
 - 로그인, 회원가입 등 인증 기능에 Firebase의 authentication api 사용
 - database로 firebase의 firestore(nosql) 사용
 - UI Framework으로 `evergreen-ui` 사용 
-- 리엑트 WYSIWYG 에디터 [Slate](https://www.slatejs.org/) 사용
+- WYSIWYG 에디터 [react-draft-wysiwyg](https://github.com/jpuri/react-draft-wysiwyg) 사용
 
 ## 개발 환경
 - react 16.8.6
 - react-router-dom 5.0.1
 - recompose 0.30.0
-- slate 0.47.4
 - firebase 6.3.3
 - evergreen-ui 4.18.1
+- react-draft-wysiwyg 1.13.2
 - lodash 4.17.15
 - react-sizes 2.0.0
