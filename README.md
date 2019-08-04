@@ -1,8 +1,7 @@
 # 📒 Notes
-React와 Firebase 로 만든 노트 웹 어플리케이션 :)   
+React와 Firebase 로 만든 노트 웹 어플리케이션
 https://notes-d5c0d.web.app/
 
-> 현재 에디터에 한글 입력이 불편한 부분이 있어 수정 중입니다 😃  
 
 ## 특이사항
 - `create-react-app`으로 제작. `react-router`, `recompose` 등 사용
@@ -10,8 +9,8 @@ https://notes-d5c0d.web.app/
 - 노트 작성 후 500ms 지나면 자동 저장. 리엑트 컴포넌트의 `onChange` 이벤트 핸들러와 [lodash.debounce](https://lodash.com/docs/4.17.15#debounce) 사용
 - `react-sizes` 활용한 responsive layout. 
 - 로그인, 회원가입 등 인증 기능에 Firebase의 authentication api 사용
-- database로 firebase의 firestore(nosql) 사용
-- UI Framework으로 `evergreen-ui` 사용 
+- database로 firebase의 firestore 사용
+- UI Framework으로 [evergreen-ui](https://evergreen.segment.com/) 사용 
 - WYSIWYG 에디터 [react-draft-wysiwyg](https://github.com/jpuri/react-draft-wysiwyg) 사용
 
 ## 개발 환경

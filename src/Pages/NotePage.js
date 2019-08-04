@@ -23,6 +23,7 @@ import { EditorState, convertFromRaw, convertToRaw } from "draft-js";
 import firebase, { db, auth } from "../db";
 import { MOBILE_WIDTH } from "../common";
 import { userContext } from "../Context";
+import Sidebar from "../Components/Sidebar";
 
 class NotePage extends Component {
   static contextType = userContext;
@@ -193,89 +194,46 @@ class NotePage extends Component {
   };
   render() {
     const user = this.context;
-    const { notes, selected } = this.state
+    const { notes, selected } = this.state;
     return (
-      <Pane height="100%">
-        <SideSheet
-          position={Position.LEFT}
-          isShown={this.state.isShown}
-          width={this.props.isMobile ? this.props.width - 70 : 250}
-          onCloseComplete={() => this.setState({ isShown: false })}
-        >
-          <Pane height="100%" background="tint1" className="sidebar">
-            {/* display: flex */}
-            <Menu>
-              <Pane>
-                <Menu.Group>
-                  <Popover
-                    position={Position.BOTTOM_RIGHT}
-                    content={
-                      <Menu>
-                        <Menu.Group>
-                          <Menu.Item
-                            icon="log-out"
-                            onSelect={this._handleLogOut}
-                          >
-                            로그아웃
-                          </Menu.Item>
-                        </Menu.Group>
-                      </Menu>
-                    }
-                  >
-                    <Menu.Item>
-                      <Pane display="flex" alignItems="center">
-                        <Avatar
-                          name={user.username}
-                          size={25}
-                          sizeLimitOneCharacter={25}
-                          marginRight={5}
-                        />
-                        <Text fontWeight={600}>{user.username}</Text>
-                      </Pane>
-                    </Menu.Item>
-                  </Popover>
-                </Menu.Group>
-              </Pane>
-              <Pane
-                className="note-list"
-                flex={1}
-                overflowX="hidden"
-                overflowY="auto"
-              >
-                <Menu.Group>
-                  {this._getNotesArraySorted().map(note => (
-                    <Menu.Item
-                      key={note.id}
-                      onSelect={() => this._handleNoteSelect(note.id)}
-                    >
-                      <Text
-                        fontWeight={note.id === this.state.selected ? 700 : 500}
-                      >
-                        {note.title || "제목 없음"}
-                      </Text>
-                    </Menu.Item>
-                  ))}
-                </Menu.Group>
-              </Pane>
-              <Pane>
-                <Menu.Group>
-                  <Menu.Item onSelect={this._handleAddNoteButton} icon="edit">
-                    새 노트 작성하기
-                  </Menu.Item>
-                </Menu.Group>
-              </Pane>
-            </Menu>
+      <Pane height="100%" display="flex">
+        {this.props.isMobile ? (
+          <SideSheet
+            position={Position.LEFT}
+            isShown={this.state.isShown}
+            width={this.props.width - 70}
+            onCloseComplete={() => this.setState({ isShown: false })}
+          >
+            <Sidebar
+              onLogout={this._handleLogOut}
+              onNoteSelect={this._handleNoteSelect}
+              noteList={this._getNotesArraySorted()}
+              selected={selected}
+              onAddNote={this._handleAddNoteButton}
+            />
+          </SideSheet>
+        ) : (
+          <Pane width={250} height="100%">
+            <Sidebar
+              onLogout={this._handleLogOut}
+              onNoteSelect={this._handleNoteSelect}
+              noteList={this._getNotesArraySorted()}
+              selected={selected}
+              onAddNote={this._handleAddNoteButton}
+            />
           </Pane>
-        </SideSheet>
-        <Pane display="flex" flexDirection="column" height="100%">
+        )}
+
+        <Pane display="flex" flex={1} flexDirection="column" height="100%">
           <Pane
             display="flex"
-            justifyContent="space-between"
+            justifyContent={this.props.isMobile ? "space-between" : "flex-end"} 
             marginX={majorScale(2)}
             marginTop={majorScale(2)}
           >
             <IconButton
               appearance="minimal"
+              display={ this.props.isMobile ? "block" : "none" }
               icon="menu"
               iconSize={18}
               onClick={() => this.setState({ isShown: true })}
@@ -303,23 +261,21 @@ class NotePage extends Component {
           </Pane>
           <Pane
             paddingX={this.props.isMobile ? 15 : 0}
-            width={this.props.isMobile ? "100%" : MOBILE_WIDTH}
+            width={this.props.width < MOBILE_WIDTH + 250 ? "100%" : MOBILE_WIDTH}
             marginX="auto"
             paddingTop={15}
           >
-            <Pane marginBottom={20}>
+            <Pane>
               <Heading size={900}>
-                {this.state.isLoading ? (
-                  <Text fontWeight={500} fontSize={majorScale(3)}>
-                    제목 없음..
-                  </Text>
-                ) : (
+                {this.state.isLoading ||
                   <TextInput
                     padding={0}
                     width="100%"
                     className="title-input"
                     boxShadow="none"
-                    fontWeight={500}
+                      fontWeight={500}
+                      placeholder="title.."
+                    spellCheck={false}
                     fontSize={majorScale(3)}
                     value={this.state.title}
                     onChange={e =>
@@ -335,17 +291,15 @@ class NotePage extends Component {
                       })
                     }
                   />
-                )}
+                }
               </Heading>
             </Pane>
             <Pane flex={1} overflowY="auto">
-              {this.state.isLoading ? (
-                <Text>content..</Text>
-              ) : (
-                  <Editor
-                    placeholder="content here.."
-                    editorState={this.state.content}
-                    toolbarHidden={true}
+              {this.state.isLoading || (
+                <Editor
+                  placeholder="content here.."
+                  editorState={this.state.content}
+                  toolbarHidden={true}
                   onEditorStateChange={this._handleContentChange}
                 />
               )}
