@@ -8,8 +8,6 @@ import {
   Pane,
   Heading,
   Menu,
-  Text,
-  Avatar,
   Popover,
   IconButton,
   SideSheet,
@@ -142,6 +140,7 @@ class NotePage extends Component {
   _handleLogOut = async () => {
     try {
       await auth.signOut();
+      this.context.updateUser({isLoggedIn: false})
       this.props.history.push("/signin");
     } catch (err) {
       console.log(err);
@@ -193,8 +192,7 @@ class NotePage extends Component {
     }
   };
   render() {
-    const user = this.context;
-    const { notes, selected } = this.state;
+    const { selected } = this.state;
     return (
       <Pane height="100%" display="flex">
         {this.props.isMobile ? (

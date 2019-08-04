@@ -3,13 +3,14 @@ import { BrowserRouter as Router, Route } from "react-router-dom";
 import NotePage from "./Pages/NotePage";
 import SignInPage from "./Pages/SignInPage";
 import SignUpPage from "./Pages/SignUpPage";
-import "./App.css";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import { auth } from "./db";
 import { userContext, initialUser } from "./Context";
+import "./App.css";
 
 function App() {
   const [user, setUser] = useState(initialUser);
+  const updateUser = (user) => setUser({ ...user })
 
   useEffect(() => {
     auth.onAuthStateChanged(firebaseUser => {
@@ -30,14 +31,13 @@ function App() {
             isLoading: false
           });  
         }
-        console.log(firebaseUser);
       }
     });
   
   }, [user])
   
   return (
-    <userContext.Provider value={user}>
+    <userContext.Provider value={{ ...user, updateUser }}>
       <Router>
         <ProtectedRoute exact path="/" component={NotePage} />
         <Route path="/signin" component={SignInPage} />

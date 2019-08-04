@@ -6,9 +6,11 @@ import { Pane, TextInput, Heading, Button, Text } from "evergreen-ui";
 
 import firebase, { db } from "../db";
 import { MOBILE_WIDTH } from "../common";
+import { userContext } from "../Context";
 
 
 class SignUpPage extends Component {
+  static contextType = userContext
   state = {
     email: "",
     password: "",
@@ -28,7 +30,13 @@ class SignUpPage extends Component {
         uid: user.uid,
         email: user.email
       })
-
+      this.context.updateUser({
+        uid: user.uid,
+        email: user.email,
+        username: user.displayName,
+        isLoggedIn: true,
+        isLoading: false,
+      })
       this.props.history.push("/");
     } catch (error) {
       console.log(error);
