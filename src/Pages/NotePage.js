@@ -110,7 +110,6 @@ class NotePage extends Component {
       .doc(noteId)
       .get();
     const note = res.data();
-    console.log(note);
     this.setState({
       selected: note.id,
       title: note.title,

@@ -1,4 +1,4 @@
-.sidebar nav{
+#sidebar nav{
   display: flex;
   flex-direction: column;
   height: 100%;

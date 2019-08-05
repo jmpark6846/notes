@@ -29,11 +29,13 @@ function App() {
           setUser({
             ...initialUser,
             isLoading: false
-          });  
+          });
         }
       }
     });
-  
+    return () => { 
+      auth.onAuthStateChanged(() => { })  
+    }
   }, [user])
   
   return (

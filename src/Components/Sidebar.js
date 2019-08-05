@@ -7,7 +7,7 @@ const Sidebar = props => {
   return (
     <userContext.Consumer>
       {user => (
-        <Pane height="100%" background="tint1" className="sidebar">
+        <Pane height="100%" background="tint1" data-testid="sidebar" id="sidebar">
           {/* display: flex */}
           <Menu>
             <Pane>

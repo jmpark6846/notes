@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches snapshot  1`] = `
+<DocumentFragment>
+  <div
+    class="📦bg_1vd85pq 📦h_100prcnt 📦pt_50px 📦box-szg_border-box css-nil"
+  >
+    <div
+      class="📦b-top_1px-solid-E4E7EB 📦b-rgt_1px-solid-E4E7EB 📦b-btm_1px-solid-E4E7EB 📦b-lft_1px-solid-E4E7EB 📦bs_17sc08g 📦bg_11ev722 📦ml_auto 📦mr_auto 📦pb_30px 📦pt_30px 📦pl_50px 📦pr_50px 📦w_400px 📦box-szg_border-box css-nil"
+    >
+      <h2
+        class="📦mt_0px 📦mb_20px 📦fnt-sze_20px 📦f-wght_500 📦ln-ht_24px 📦ltr-spc_-0-07px 📦fnt-fam_wm9v6k 📦color_234361 📦txt-algn_center 📦box-szg_border-box"
+      >
+        로그인
+      </h2>
+      <input
+        aria-invalid="false"
+        class="css-5ljhhe 📦color_425A70 📦fnt-fam_b77syt 📦fnt-sze_12px 📦f-wght_400 📦ln-ht_16px 📦ltr-spc_0 📦w_100prcnt 📦h_32px 📦pl_10px 📦pr_10px 📦bblr_3px 📦bbrr_3px 📦btlr_3px 📦btrr_3px 📦mb_10px 📦box-szg_border-box"
+        name="email"
+        placeholder="이메일"
+        required=""
+        spellcheck="true"
+        type="text"
+        value=""
+      />
+      <input
+        aria-invalid="false"
+        class="css-5ljhhe 📦color_425A70 📦fnt-fam_b77syt 📦fnt-sze_12px 📦f-wght_400 📦ln-ht_16px 📦ltr-spc_0 📦w_100prcnt 📦h_32px 📦pl_10px 📦pr_10px 📦bblr_3px 📦bbrr_3px 📦btlr_3px 📦btrr_3px 📦box-szg_border-box"
+        name="password"
+        placeholder="비밀번호"
+        required=""
+        spellcheck="true"
+        type="password"
+        value=""
+      />
+      <div
+        class="📦pb_10px 📦pl_10px 📦pr_10px 📦pt_10px 📦box-szg_border-box css-nil"
+        intent="danger"
+      >
+        <span
+          class="📦color_red 📦fnt-fam_b77syt 📦fnt-sze_14px 📦f-wght_400 📦ln-ht_20px 📦ltr-spc_-0-05px 📦box-szg_border-box"
+        />
+      </div>
+      <div
+        class="📦dspl_flex 📦just-cnt_flex-end 📦mt_20px 📦box-szg_border-box css-nil"
+      >
+        <button
+          class="css-69cngj 📦fnt-fam_b77syt 📦mt_0px 📦fnt-sze_12px 📦f-wght_500 📦ln-ht_32px 📦ltr-spc_0 📦btrr_3px 📦bbrr_3px 📦btlr_3px 📦bblr_3px 📦pt_0px 📦pb_0px 📦pr_16px 📦pl_16px 📦ml_0px 📦mr_10px 📦mb_0px 📦h_32px 📦pst_relative 📦dspl_inline-flex 📦algn-itms_center 📦flx-wrap_nowrap 📦box-szg_border-box"
+        >
+          회원가입
+        </button>
+        <button
+          class="css-nwvixr 📦fnt-fam_b77syt 📦mt_0px 📦fnt-sze_12px 📦f-wght_500 📦ln-ht_32px 📦ltr-spc_0 📦btrr_3px 📦bbrr_3px 📦btlr_3px 📦bblr_3px 📦pt_0px 📦pb_0px 📦pr_16px 📦pl_16px 📦ml_0px 📦mr_0px 📦mb_0px 📦h_32px 📦pst_relative 📦dspl_inline-flex 📦algn-itms_center 📦flx-wrap_nowrap 📦box-szg_border-box"
+        >
+          로그인
+        </button>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches snapshot  1`] = `
+<DocumentFragment>
+  <div
+    class="📦bg_1vd85pq 📦h_100prcnt 📦box-szg_border-box css-nil"
+    data-testid="sidebar"
+    id="sidebar"
+  >
+    <nav
+      class="📦box-szg_border-box css-nil"
+      outline="none"
+      role="menu"
+    >
+      <div
+        class="📦box-szg_border-box css-nil"
+      >
+        <div
+          class="📦pb_8px 📦pt_8px 📦box-szg_border-box css-nil"
+        >
+          <div
+            aria-haspopup="true"
+            class="css-z3ro6d 📦h_32px 📦dspl_flex 📦algn-itms_center 📦box-szg_border-box css-nil"
+            data-isselectable="true"
+            role="button"
+            tabindex="0"
+          >
+            <span
+              class="📦color_none 📦fnt-fam_b77syt 📦fnt-sze_14px 📦f-wght_400 📦ln-ht_20px 📦ltr-spc_-0-05px 📦ml_16px 📦mr_16px 📦flx_1 📦box-szg_border-box"
+            >
+              <div
+                class="📦dspl_flex 📦algn-itms_center 📦box-szg_border-box css-nil"
+              >
+                <div
+                  class="📦w_25px 📦h_25px 📦ovflw-x_hidden 📦ovflw-y_hidden 📦bblr_9999px 📦bbrr_9999px 📦btlr_9999px 📦btrr_9999px 📦pst_relative 📦dspl_inline-flex 📦flx-srnk_0 📦just-cnt_center 📦bg-clr_eae7f8 📦mr_5px 📦box-szg_border-box"
+                >
+                  <span
+                    class="📦color_37248f 📦fnt-fam_b77syt 📦fnt-sze_12px 📦f-wght_400 📦ln-ht_12px 📦ltr-spc_-0-05px 📦w_25px 📦h_25px 📦box-szg_border-box css-1ktdej1"
+                  >
+                    ?
+                  </span>
+                </div>
+                <span
+                  class="📦color_425A70 📦fnt-fam_b77syt 📦fnt-sze_14px 📦f-wght_600 📦ln-ht_20px 📦ltr-spc_-0-05px 📦box-szg_border-box"
+                />
+              </div>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="note-list 📦flx_1 📦ovflw-x_hidden 📦ovflw-y_auto 📦box-szg_border-box css-nil"
+      >
+        <div
+          class="📦pb_8px 📦pt_8px 📦box-szg_border-box css-nil"
+        />
+      </div>
+      <div
+        class="📦box-szg_border-box css-nil"
+      >
+        <div
+          class="📦pb_8px 📦pt_8px 📦box-szg_border-box css-nil"
+        >
+          <div
+            class="css-z3ro6d 📦h_40px 📦dspl_flex 📦algn-itms_center 📦box-szg_border-box css-nil"
+            data-isselectable="true"
+            role="menuitem"
+            tabindex="0"
+          >
+            <svg
+              class="📦ml_16px 📦mr_-4px 📦flx-srnk_0 📦w_16px 📦h_16px 📦box-szg_border-box"
+              data-icon="edit"
+              style="fill: #66788A;"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M3.25 10.26l2.47 2.47 6.69-6.69-2.46-2.48-6.7 6.7zM.99 14.99l3.86-1.39-2.46-2.44-1.4 3.83zm12.25-14c-.48 0-.92.2-1.24.51l-1.44 1.44 2.47 2.47 1.44-1.44c.32-.32.51-.75.51-1.24.01-.95-.77-1.74-1.74-1.74z"
+                fill-rule="evenodd"
+              />
+            </svg>
+            <span
+              class="📦color_none 📦fnt-fam_b77syt 📦fnt-sze_14px 📦f-wght_400 📦ln-ht_20px 📦ltr-spc_-0-05px 📦ml_16px 📦mr_16px 📦flx_1 📦box-szg_border-box"
+            >
+              새 노트 작성하기
+            </span>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</DocumentFragment>
+`;
