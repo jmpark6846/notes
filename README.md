@@ -28,9 +28,9 @@ https://notes-d5c0d.web.app/
 - 2019.08.06 에디터 영역의 높이를 100%로 수정. 스크롤바의 위치를 화면 오른쪽에 붙이도록 수정.
 
 before
-![before](./imgs/20190806_height_before.png)
+![before](./imgs/20190806_height_before.png | width=300)
 
 after
-![after](./imgs/20190806_height_after.png)
+![after](./imgs/20190806_height_after.png ! width=300)
 
 
