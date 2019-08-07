@@ -139,7 +139,7 @@ class NotePage extends Component {
   _handleLogOut = async () => {
     try {
       await auth.signOut();
-      this.context.updateUser({isLoggedIn: false})
+      this.context.updateUser({ isLoggedIn: false });
       this.props.history.push("/signin");
     } catch (err) {
       console.log(err);
@@ -220,19 +220,30 @@ class NotePage extends Component {
             />
           </Pane>
         )}
-
-        <Pane display="flex" flex={1} flexDirection="column" height="100%">
+        <Pane
+          // paddingX={this.props.isMobile ? 15 : 0}
+          width={this.props.width < MOBILE_WIDTH + 250 ? "100%" : "100%"}
+          marginX="auto"
+          flexDirection="column"
+          height="100%"
+          flex={1}
+          display="flex"
+          flexDirection="column"
+          // paddingTop={15}
+        >
           <Pane
             display="flex"
-            justifyContent={this.props.isMobile ? "space-between" : "flex-end"} 
+            justifyContent={this.props.isMobile ? "space-between" : "flex-end"}
             marginX={majorScale(2)}
-            marginTop={majorScale(2)}
+            // alignItems="center"
+            // marginTop={majorScale(2)}
           >
             <IconButton
               appearance="minimal"
-              display={ this.props.isMobile ? "block" : "none" }
+              display={this.props.isMobile ? "block" : "none"}
               icon="menu"
               iconSize={18}
+              lineHeight={0}
               onClick={() => this.setState({ isShown: true })}
             />
             <Popover
@@ -256,51 +267,45 @@ class NotePage extends Component {
               <IconButton appearance="minimal" icon="more" iconSize={18} />
             </Popover>
           </Pane>
-          <Pane
-            paddingX={this.props.isMobile ? 15 : 0}
-            width={this.props.width < MOBILE_WIDTH + 250 ? "100%" : MOBILE_WIDTH}
-            marginX="auto"
-            paddingTop={15}
-          >
-            <Pane>
-              <Heading size={900}>
-                {this.state.isLoading ||
-                  <TextInput
-                    padding={0}
-                    width="100%"
-                    className="title-input"
-                    boxShadow="none"
-                      fontWeight={500}
-                      placeholder="title.."
-                    spellCheck={false}
-                    fontSize={majorScale(3)}
-                    value={this.state.title}
-                    onChange={e =>
-                      this.setState({
-                        notes: {
-                          ...this.state.notes,
-                          [selected]: {
-                            ...this.state.notes[selected],
-                            title: e.target.value
-                          }
-                        },
-                        title: e.target.value
-                      })
-                    }
-                  />
-                }
-              </Heading>
-            </Pane>
-            <Pane flex={1} overflowY="auto">
+          <Pane>
               {this.state.isLoading || (
-                <Editor
-                  placeholder="content here.."
-                  editorState={this.state.content}
-                  toolbarHidden={true}
-                  onEditorStateChange={this._handleContentChange}
+                <TextInput
+                  paddingX={this.props.isMobile ? 20 : 40}
+                  width="100%"
+                  className="title-input"
+                  boxShadow="none"
+                  fontWeight={500}
+                  placeholder="title.."
+                  spellCheck={false}
+                  fontSize={majorScale(3)}
+                  value={this.state.title}
+                  onChange={e =>
+                    this.setState({
+                      notes: {
+                        ...this.state.notes,
+                        [selected]: {
+                          ...this.state.notes[selected],
+                          title: e.target.value
+                        }
+                      },
+                      title: e.target.value
+                    })
+                  }
                 />
               )}
-            </Pane>
+          </Pane>
+          <Pane flex={1} overflowY="auto">
+            {this.state.isLoading || (
+              <Editor
+                editorStyle={{ padding: this.props.isMobile ? "0 20px" : "20px 40px 0px" }}
+                wrapperStyle={{ height: '100%' }}
+                
+                placeholder="content here.."
+                editorState={this.state.content}
+                // toolbarHidden={true}
+                onEditorStateChange={this._handleContentChange}
+              />
+            )}
           </Pane>
         </Pane>
       </Pane>

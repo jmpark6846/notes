@@ -12,3 +12,7 @@
 .title-input:focus{
   box-shadow: none!important;
 }
+
+.DraftEditor-root{
+  margin-top: -16px;
+}
