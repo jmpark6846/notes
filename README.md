@@ -13,6 +13,7 @@ https://notes-d5c0d.web.app/
 - UI Framework으로 [evergreen-ui](https://evergreen.segment.com/) 사용 
 - WYSIWYG 에디터 [react-draft-wysiwyg](https://github.com/jpuri/react-draft-wysiwyg) 사용
 
+
 ## 개발 환경
 - react 16.8.6
 - react-router-dom 5.0.1
@@ -22,3 +23,14 @@ https://notes-d5c0d.web.app/
 - react-draft-wysiwyg 1.13.2
 - lodash 4.17.15
 - react-sizes 2.0.0
+
+## 업데이트
+- 2019.08.06 에디터 영역의 높이를 100%로 수정. 스크롤바의 위치를 화면 오른쪽에 붙이도록 수정.
+
+before
+![before](./imgs/20190806_height_before.png)
+
+after
+![after](./imgs/20190806_height_after.png)
+
+

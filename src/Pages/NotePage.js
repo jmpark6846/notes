@@ -302,7 +302,14 @@ class NotePage extends Component {
                 
                 placeholder="content here.."
                 editorState={this.state.content}
-                // toolbarHidden={true}
+                toolbarHidden={true}
+                // toolbar={{
+                //   inline: { inDropdown: true },
+                //   list: { inDropdown: true },
+                //   textAlign: { inDropdown: true },
+                //   link: { inDropdown: true },
+                //   history: { inDropdown: true },
+                // }}
                 onEditorStateChange={this._handleContentChange}
               />
             )}
